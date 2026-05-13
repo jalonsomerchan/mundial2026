@@ -52,6 +52,7 @@ describe('project smoke checks', () => {
       'src/layouts/BaseLayout.astro',
       'src/config/site.ts',
       'src/data/worldcup2026.ts',
+      'src/i18n/countries.ts',
       'src/i18n/ui.ts',
       'src/i18n/translations',
       'src/styles/global.css',
@@ -149,6 +150,19 @@ describe('project smoke checks', () => {
     assert.match(explorer, /match-grid/);
     assert.match(home, /WorldCupExplorer/);
     assert.match(home, /getWorldCupSummary/);
+  });
+
+  it('keeps country translations and flags wired', () => {
+    const countries = readText('src/i18n/countries.ts');
+    const explorer = readText('src/components/WorldCupExplorer.astro');
+
+    assert.match(countries, /flagsapi\.com/);
+    assert.match(countries, /México/);
+    assert.match(countries, /España/);
+    assert.match(countries, /Estados Unidos/);
+    assert.match(countries, /names:\s*\{\s*es:/);
+    assert.match(explorer, /getCountryName/);
+    assert.match(explorer, /getCountryFlagUrl/);
   });
 
   it('keeps custom domain GitHub Pages settings', () => {

@@ -1,0 +1,20 @@
+---
+import Container from '../../components/Container.astro';
+import MatchCalendar from '../../components/MatchCalendar.astro';
+import { defaultLocale } from '../../config/site';
+import { getWorldCupSummary } from '../../data/worldcup2026';
+import { useTranslations } from '../../i18n/ui';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { groupMatchesByDate } from '../../utils/calendar';
+
+const locale = defaultLocale;
+const t = useTranslations(locale);
+const summary = await getWorldCupSummary();
+const days = groupMatchesByDate(summary.matches);
+---
+
+<BaseLayout title={t('calendar.metaTitle')} description={t('calendar.metaDescription')} locale={locale}>
+  <Container>
+    <MatchCalendar locale={locale} days={days} />
+  </Container>
+</BaseLayout>

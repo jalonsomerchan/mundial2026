@@ -181,4 +181,25 @@ const simulatorData = {
     letter-spacing: -0.045em;
     line-height: 1;
   }
+
+  .simulator-board {
+    contain: layout style;
+  }
+
+  .simulator-board :global(.sim-round) {
+    content-visibility: auto;
+    contain-intrinsic-size: 48rem;
+  }
+
+  .simulator-board :global(.sim-match),
+  .simulator-board :global(.sim-group-table) {
+    content-visibility: auto;
+    contain-intrinsic-size: 10rem;
+  }
+
+  @media (max-width: 560px) {
+    .simulator-board :global(.sim-round) {
+      contain-intrinsic-size: 64rem;
+    }
+  }
 </style>

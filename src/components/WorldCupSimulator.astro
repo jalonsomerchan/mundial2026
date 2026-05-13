@@ -1,0 +1,676 @@
+---
+import type { Locale } from '../config/site';
+import type { WorldCupMatch, WorldCupSummary } from '../data/worldcup2026';
+import { getCountryFlagUrl, getCountryName, isKnownCountry } from '../i18n/countries';
+import { useTranslations } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+  summary: WorldCupSummary;
+}
+
+const { locale, summary } = Astro.props;
+const t = useTranslations(locale);
+
+function getGroupCode(groupName?: string) {
+  return groupName?.match(/[A-Z]$/)?.[0] ?? '';
+}
+
+function getMatchId(match: WorldCupMatch, index: number) {
+  return match.num ? `m${match.num}` : `i${index}`;
+}
+
+function getTeamPayload(team: string) {
+  return {
+    raw: team,
+    label: getCountryName(team, locale),
+    flag: getCountryFlagUrl(team),
+    isCountry: isKnownCountry(team),
+  };
+}
+
+const simulatorData = {
+  labels: {
+    champion: t('simulator.champion'),
+    pickWinner: t('simulator.pickWinner'),
+    simulated: t('simulator.simulated'),
+    realResult: t('simulator.realResult'),
+    pending: t('simulator.pending'),
+    reset: t('simulator.reset'),
+    noChampion: t('simulator.noChampion'),
+    unresolvedTeam: t('simulator.unresolvedTeam'),
+    groupStage: t('simulator.groupStage'),
+    knockoutStage: t('simulator.knockoutStage'),
+  },
+  matches: summary.matches.map((match, index) => ({
+    id: getMatchId(match, index),
+    index,
+    num: match.num ?? null,
+    round: match.round,
+    group: match.group ?? null,
+    groupCode: getGroupCode(match.group),
+    team1: getTeamPayload(match.team1),
+    team2: getTeamPayload(match.team2),
+    score1: match.score1 ?? null,
+    score2: match.score2 ?? null,
+  })),
+};
+---
+
+<section class="simulator-shell">
+  <header class="simulator-hero">
+    <p class="eyebrow">{t('simulator.eyebrow')}</p>
+    <h1>{t('simulator.title')}</h1>
+    <p>{t('simulator.description')}</p>
+    <button class="reset-button" type="button" data-reset-simulator>{t('simulator.reset')}</button>
+  </header>
+
+  <aside class="champion-card" aria-live="polite">
+    <span>{t('simulator.champion')}</span>
+    <strong data-simulator-champion>{t('simulator.noChampion')}</strong>
+  </aside>
+
+  <div class="simulator-board" data-simulator-board></div>
+</section>
+
+<script type="application/json" id="worldcup-simulator-data" set:html={JSON.stringify(simulatorData)}></script>
+
+<script>
+  const payloadElement = document.getElementById('worldcup-simulator-data');
+  const payload = JSON.parse(payloadElement?.textContent || '{}');
+  const matches = payload.matches || [];
+  const labels = payload.labels || {};
+  const board = document.querySelector('[data-simulator-board]');
+  const championNode = document.querySelector('[data-simulator-champion]');
+  const resetButton = document.querySelector('[data-reset-simulator]');
+  const storageKey = 'worldcup-2026-simulator-v1';
+  let picks = {};
+
+  try {
+    picks = JSON.parse(localStorage.getItem(storageKey) || '{}');
+  } catch {
+    picks = {};
+  }
+
+  function savePicks() {
+    localStorage.setItem(storageKey, JSON.stringify(picks));
+  }
+
+  function getMatchNumberMap() {
+    return new Map(matches.filter((match) => match.num).map((match) => [String(match.num), match]));
+  }
+
+  function getCountryTeam(team) {
+    return team?.isCountry ? team : null;
+  }
+
+  function teamKey(team) {
+    return team?.raw || '';
+  }
+
+  function makeStanding(team) {
+    return { team, played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, points: 0 };
+  }
+
+  function addWin(standing) {
+    standing.played += 1;
+    standing.won += 1;
+    standing.goalsFor += 1;
+    standing.points += 3;
+    standing.goalDifference = standing.goalsFor - standing.goalsAgainst;
+  }
+
+  function addLoss(standing) {
+    standing.played += 1;
+    standing.lost += 1;
+    standing.goalsAgainst += 1;
+    standing.goalDifference = standing.goalsFor - standing.goalsAgainst;
+  }
+
+  function addScore(standing, goalsFor, goalsAgainst) {
+    standing.played += 1;
+    standing.goalsFor += goalsFor;
+    standing.goalsAgainst += goalsAgainst;
+    standing.goalDifference = standing.goalsFor - standing.goalsAgainst;
+
+    if (goalsFor > goalsAgainst) {
+      standing.won += 1;
+      standing.points += 3;
+    } else if (goalsFor === goalsAgainst) {
+      standing.drawn += 1;
+      standing.points += 1;
+    } else {
+      standing.lost += 1;
+    }
+  }
+
+  function getActualWinner(match) {
+    if (match.score1 === null || match.score2 === null || match.score1 === match.score2) return null;
+    return match.score1 > match.score2 ? match.team1 : match.team2;
+  }
+
+  function getPickedWinner(match) {
+    const picked = picks[match.id];
+    if (!picked) return null;
+    return picked === teamKey(match.team1) ? match.team1 : picked === teamKey(match.team2) ? match.team2 : null;
+  }
+
+  function getWinner(match) {
+    return getActualWinner(match) || getPickedWinner(match);
+  }
+
+  function getGroupStandings() {
+    const groups = new Map();
+
+    matches.filter((match) => match.group).forEach((match) => {
+      const group = groups.get(match.groupCode) || new Map();
+      [match.team1, match.team2].forEach((team) => {
+        if (team.isCountry && !group.has(team.raw)) group.set(team.raw, makeStanding(team));
+      });
+      groups.set(match.groupCode, group);
+    });
+
+    matches.filter((match) => match.group).forEach((match) => {
+      const group = groups.get(match.groupCode);
+      const standing1 = group?.get(match.team1.raw);
+      const standing2 = group?.get(match.team2.raw);
+      if (!standing1 || !standing2) return;
+
+      if (match.score1 !== null && match.score2 !== null) {
+        addScore(standing1, match.score1, match.score2);
+        addScore(standing2, match.score2, match.score1);
+        return;
+      }
+
+      const winner = getPickedWinner(match);
+      if (!winner) return;
+
+      if (winner.raw === match.team1.raw) {
+        addWin(standing1);
+        addLoss(standing2);
+      } else {
+        addWin(standing2);
+        addLoss(standing1);
+      }
+    });
+
+    return new Map([...groups.entries()].map(([groupCode, standings]) => [
+      groupCode,
+      [...standings.values()].sort((a, b) => {
+        if (b.points !== a.points) return b.points - a.points;
+        if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
+        if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
+        return a.team.label.localeCompare(b.team.label);
+      }),
+    ]));
+  }
+
+  function resolveToken(team, context) {
+    if (!team) return null;
+    if (team.isCountry) return team;
+
+    const winnerMatch = team.raw.match(/^W(\d+)$/);
+    if (winnerMatch) {
+      const source = context.matchByNumber.get(winnerMatch[1]);
+      return source ? getWinner(source) : null;
+    }
+
+    const loserMatch = team.raw.match(/^L(\d+)$/);
+    if (loserMatch) {
+      const source = context.matchByNumber.get(loserMatch[1]);
+      const winner = source ? getWinner(source) : null;
+      if (!source || !winner) return null;
+      return winner.raw === source.team1.raw ? source.team2 : source.team1;
+    }
+
+    const groupPosition = team.raw.match(/^([123])([A-L](?:\/[A-L])*)$/);
+    if (groupPosition) {
+      const position = Number(groupPosition[1]);
+      const groupCodes = groupPosition[2].split('/');
+
+      if (position === 3 && groupCodes.length > 1) {
+        return groupCodes
+          .map((code) => context.groupStandings.get(code)?.[2])
+          .filter(Boolean)
+          .sort((a, b) => {
+            if (b.points !== a.points) return b.points - a.points;
+            if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
+            return a.team.label.localeCompare(b.team.label);
+          })[0]?.team || null;
+      }
+
+      return context.groupStandings.get(groupCodes[0])?.[position - 1]?.team || null;
+    }
+
+    return null;
+  }
+
+  function getResolvedMatch(match, context) {
+    return {
+      ...match,
+      resolvedTeam1: resolveToken(match.team1, context),
+      resolvedTeam2: resolveToken(match.team2, context),
+    };
+  }
+
+  function renderTeam(team, fallback) {
+    if (!team) return `<span class="team-placeholder">${labels.unresolvedTeam || 'Por decidir'}</span>`;
+    const flag = team.flag ? `<img src="${team.flag}" width="28" height="28" alt="" loading="lazy" decoding="async">` : '';
+    return `${flag}<span>${team.label || fallback || team.raw}</span>`;
+  }
+
+  function renderMatch(match, context) {
+    const resolved = getResolvedMatch(match, context);
+    const actualWinner = getActualWinner(resolved);
+    const pickedWinner = getPickedWinner(resolved);
+    const winner = actualWinner || pickedWinner;
+    const team1Ready = Boolean(resolved.resolvedTeam1);
+    const team2Ready = Boolean(resolved.resolvedTeam2);
+    const locked = Boolean(actualWinner);
+    const canPick = team1Ready && team2Ready && !locked;
+    const team1Selected = winner?.raw === resolved.resolvedTeam1?.raw;
+    const team2Selected = winner?.raw === resolved.resolvedTeam2?.raw;
+    const status = locked ? labels.realResult : pickedWinner ? labels.simulated : labels.pending;
+
+    return `
+      <article class="sim-match ${winner ? 'is-decided' : ''} ${locked ? 'is-locked' : ''}">
+        <div class="sim-match-head">
+          <span>${match.group || match.round}</span>
+          <small>${status}</small>
+        </div>
+        <div class="sim-options">
+          <button class="sim-team ${team1Selected ? 'is-selected' : ''}" type="button" data-pick="${match.id}" data-team="${resolved.resolvedTeam1?.raw || ''}" ${canPick ? '' : 'disabled'}>
+            ${renderTeam(resolved.resolvedTeam1, match.team1.label)}
+          </button>
+          <span class="sim-versus">vs</span>
+          <button class="sim-team ${team2Selected ? 'is-selected' : ''}" type="button" data-pick="${match.id}" data-team="${resolved.resolvedTeam2?.raw || ''}" ${canPick ? '' : 'disabled'}>
+            ${renderTeam(resolved.resolvedTeam2, match.team2.label)}
+          </button>
+        </div>
+      </article>
+    `;
+  }
+
+  function renderGroupStandings(context) {
+    const sections = [...context.groupStandings.entries()].map(([groupCode, standings]) => `
+      <section class="sim-group-table">
+        <h3>Grupo ${groupCode}</h3>
+        <ol>
+          ${standings.map((standing) => `
+            <li>
+              ${renderTeam(standing.team)}
+              <strong>${standing.points}</strong>
+            </li>
+          `).join('')}
+        </ol>
+      </section>
+    `).join('');
+
+    return `<div class="sim-groups-grid">${sections}</div>`;
+  }
+
+  function render() {
+    const context = {
+      matchByNumber: getMatchNumberMap(),
+      groupStandings: getGroupStandings(),
+    };
+    const groupedByRound = new Map();
+
+    matches.forEach((match) => {
+      const key = match.group ? labels.groupStage : match.round || labels.knockoutStage;
+      const list = groupedByRound.get(key) || [];
+      list.push(match);
+      groupedByRound.set(key, list);
+    });
+
+    const roundSections = [...groupedByRound.entries()].map(([round, roundMatches]) => `
+      <section class="sim-round">
+        <header><h2>${round}</h2><span>${roundMatches.length}</span></header>
+        <div class="sim-round-grid">
+          ${roundMatches.map((match) => renderMatch(match, context)).join('')}
+        </div>
+      </section>
+    `).join('');
+
+    const finalMatch = matches.find((match) => /final/i.test(match.round));
+    const champion = finalMatch ? getWinner(getResolvedMatch(finalMatch, context)) : null;
+
+    if (championNode) {
+      championNode.innerHTML = champion ? renderTeam(champion) : (labels.noChampion || 'Elige ganadores');
+    }
+
+    if (board) {
+      board.innerHTML = `
+        <section class="sim-round standings-round">
+          <header><h2>${labels.groupStage}</h2><span>${labels.pickWinner}</span></header>
+          ${renderGroupStandings(context)}
+        </section>
+        ${roundSections}
+      `;
+    }
+  }
+
+  board?.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-pick]');
+    if (!button || button.disabled) return;
+
+    const matchId = button.getAttribute('data-pick');
+    const team = button.getAttribute('data-team');
+    if (!matchId || !team) return;
+
+    picks[matchId] = team;
+    savePicks();
+    render();
+  });
+
+  resetButton?.addEventListener('click', () => {
+    picks = {};
+    savePicks();
+    render();
+  });
+
+  render();
+</script>
+
+<style>
+  .simulator-shell {
+    padding: var(--space-16) 0;
+  }
+
+  .simulator-hero {
+    background:
+      radial-gradient(circle at top left, var(--color-primary-soft), transparent 36rem),
+      var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--space-5);
+    overflow: hidden;
+    padding: clamp(var(--space-6), 8vw, var(--space-12));
+  }
+
+  .eyebrow {
+    margin: 0 0 var(--space-3);
+    color: var(--color-primary);
+    font-size: 0.78rem;
+    font-weight: 850;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  h1,
+  h2,
+  h3,
+  p {
+    margin-top: 0;
+  }
+
+  h1 {
+    margin-bottom: var(--space-5);
+    max-width: 56rem;
+    font-size: clamp(2.7rem, 14vw, 6rem);
+    font-weight: 950;
+    letter-spacing: -0.08em;
+    line-height: 0.9;
+  }
+
+  .simulator-hero p:not(.eyebrow) {
+    color: var(--color-text-muted);
+    font-size: 1.06rem;
+    line-height: 1.7;
+    max-width: 44rem;
+  }
+
+  .reset-button {
+    background: var(--color-text);
+    border: 0;
+    border-radius: var(--radius-full);
+    color: var(--color-bg);
+    cursor: pointer;
+    font-weight: 850;
+    margin-top: var(--space-4);
+    padding: 0.8rem 1.1rem;
+  }
+
+  .champion-card {
+    align-items: center;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    border-radius: var(--radius-2xl);
+    color: #fff;
+    display: flex;
+    gap: var(--space-4);
+    justify-content: space-between;
+    margin-bottom: var(--space-6);
+    padding: var(--space-5);
+    position: sticky;
+    top: var(--space-3);
+    z-index: 2;
+  }
+
+  .champion-card span {
+    font-size: 0.75rem;
+    font-weight: 850;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .champion-card strong,
+  .champion-card :global(.team-placeholder) {
+    align-items: center;
+    display: inline-flex;
+    gap: var(--space-2);
+    font-size: clamp(1.25rem, 6vw, 2rem);
+    font-weight: 950;
+    letter-spacing: -0.04em;
+    text-align: right;
+  }
+
+  .champion-card img {
+    border-radius: var(--radius-full);
+  }
+
+  .simulator-board {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .sim-round {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-xs);
+    padding: var(--space-4);
+  }
+
+  .sim-round > header {
+    align-items: center;
+    display: flex;
+    gap: var(--space-3);
+    justify-content: space-between;
+    margin-bottom: var(--space-4);
+  }
+
+  .sim-round h2 {
+    font-size: clamp(1.45rem, 7vw, 2.4rem);
+    font-weight: 950;
+    letter-spacing: -0.06em;
+    line-height: 1;
+    margin-bottom: 0;
+  }
+
+  .sim-round > header span {
+    background: var(--color-primary-soft);
+    border-radius: var(--radius-full);
+    color: var(--color-primary);
+    font-size: 0.78rem;
+    font-weight: 850;
+    padding: 0.35rem 0.7rem;
+  }
+
+  .sim-round-grid,
+  .sim-groups-grid {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .sim-match,
+  .sim-group-table {
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-3);
+  }
+
+  .sim-match.is-decided {
+    border-color: color-mix(in srgb, var(--color-primary), transparent 45%);
+  }
+
+  .sim-match-head {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--space-2);
+  }
+
+  .sim-match-head span,
+  .sim-match-head small {
+    color: var(--color-text-soft);
+    font-size: 0.72rem;
+    font-weight: 850;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .sim-options {
+    align-items: stretch;
+    display: grid;
+    gap: var(--space-2);
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  .sim-team {
+    align-items: center;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    color: var(--color-text);
+    cursor: pointer;
+    display: flex;
+    font: inherit;
+    font-weight: 850;
+    gap: var(--space-2);
+    justify-content: center;
+    min-height: 3.25rem;
+    min-width: 0;
+    padding: 0.7rem;
+    text-align: center;
+  }
+
+  .sim-team span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sim-team img {
+    border-radius: var(--radius-full);
+    flex: 0 0 auto;
+  }
+
+  .sim-team:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  .sim-team.is-selected {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .sim-versus {
+    align-self: center;
+    color: var(--color-text-soft);
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .team-placeholder {
+    color: var(--color-text-soft);
+    font-style: italic;
+  }
+
+  .sim-group-table h3 {
+    font-size: 1rem;
+    font-weight: 900;
+    margin-bottom: var(--space-3);
+  }
+
+  .sim-group-table ol {
+    display: grid;
+    gap: var(--space-2);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .sim-group-table li {
+    align-items: center;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    display: flex;
+    gap: var(--space-2);
+    justify-content: space-between;
+    padding: 0.55rem 0.7rem;
+  }
+
+  .sim-group-table li span:first-child {
+    align-items: center;
+    display: inline-flex;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+
+  .sim-group-table img {
+    border-radius: var(--radius-full);
+  }
+
+  @media (max-width: 560px) {
+    .sim-options {
+      grid-template-columns: 1fr;
+    }
+
+    .sim-versus {
+      justify-self: center;
+    }
+
+    .champion-card {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+
+  @media (min-width: 780px) {
+    .sim-round-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .sim-groups-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1120px) {
+    .sim-round-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .sim-groups-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+</style>

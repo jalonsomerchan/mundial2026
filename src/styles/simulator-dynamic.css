@@ -1,0 +1,337 @@
+.simulator-board {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.sim-round {
+  background: color-mix(in srgb, var(--color-surface), transparent 4%);
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius-2xl) + 0.35rem);
+  box-shadow: 0 18px 60px rgb(15 23 42 / 0.08);
+  overflow: hidden;
+  padding: var(--space-4);
+}
+
+.sim-round > header {
+  align-items: end;
+  display: flex;
+  gap: var(--space-3);
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+  padding: var(--space-1) var(--space-1) 0;
+}
+
+.sim-round > header p {
+  color: var(--color-primary);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  margin: 0 0 var(--space-2);
+  text-transform: uppercase;
+}
+
+.sim-round h2 {
+  font-size: clamp(1.55rem, 7vw, 2.55rem);
+  font-weight: 950;
+  letter-spacing: -0.065em;
+  line-height: 1;
+  margin: 0;
+}
+
+.sim-round > header span {
+  align-items: center;
+  background: var(--color-primary-soft);
+  border-radius: var(--radius-full);
+  color: var(--color-primary);
+  display: inline-flex;
+  font-size: 0.8rem;
+  font-weight: 900;
+  height: 2.1rem;
+  justify-content: center;
+  min-width: 2.1rem;
+  padding: 0 0.75rem;
+}
+
+.sim-round-grid,
+.sim-groups-grid {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.sim-match,
+.sim-group-table {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-surface-soft), #fff 5%), var(--color-surface));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-3);
+}
+
+.sim-match {
+  position: relative;
+  transition: border-color var(--transition-base), box-shadow var(--transition-base), transform var(--transition-fast);
+}
+
+.sim-match::before {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  content: '';
+  height: 0.35rem;
+  left: var(--space-3);
+  position: absolute;
+  right: var(--space-3);
+  top: 0;
+  transform: translateY(-50%);
+}
+
+.sim-match.is-decided {
+  border-color: color-mix(in srgb, var(--color-primary), transparent 45%);
+  box-shadow: 0 16px 38px rgb(15 23 42 / 0.08);
+}
+
+.sim-match.is-decided::before {
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+}
+
+.sim-match:hover {
+  transform: translateY(-1px);
+}
+
+.sim-match-head {
+  align-items: center;
+  display: flex;
+  gap: var(--space-2);
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.sim-match-round,
+.sim-status {
+  align-items: center;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  min-height: 1.65rem;
+  padding: 0.25rem 0.58rem;
+  text-transform: uppercase;
+}
+
+.sim-match-round {
+  background: var(--color-surface-soft);
+  color: var(--color-text-soft);
+}
+
+.sim-status {
+  background: var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.status-real {
+  background: color-mix(in srgb, var(--color-accent), transparent 82%);
+  color: var(--color-accent);
+}
+
+.status-simulated {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.sim-options {
+  align-items: stretch;
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+
+.sim-team {
+  align-items: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text);
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-size: 0.98rem;
+  font-weight: 900;
+  gap: var(--space-2);
+  justify-content: center;
+  line-height: 1.1;
+  min-height: 4rem;
+  min-width: 0;
+  padding: 0.8rem;
+  text-align: center;
+  transition:
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    color var(--transition-base),
+    transform var(--transition-fast);
+}
+
+.sim-team:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--color-primary), transparent 30%);
+  box-shadow: 0 10px 26px rgb(15 23 42 / 0.1);
+  transform: translateY(-1px);
+}
+
+.sim-team span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sim-team img,
+.champion-card img,
+.sim-group-table img {
+  border-radius: var(--radius-full);
+  flex: 0 0 auto;
+}
+
+.sim-team img {
+  box-shadow: 0 7px 16px rgb(15 23 42 / 0.14);
+}
+
+.sim-team:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.sim-team.is-selected {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 14px 36px color-mix(in srgb, var(--color-primary), transparent 72%);
+  opacity: 1;
+}
+
+.sim-versus {
+  align-items: center;
+  align-self: center;
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-soft);
+  display: inline-flex;
+  font-size: 0.68rem;
+  font-weight: 950;
+  height: 2rem;
+  justify-content: center;
+  letter-spacing: 0.08em;
+  padding: 0 0.55rem;
+  text-transform: uppercase;
+}
+
+.team-placeholder {
+  color: var(--color-text-soft);
+  font-style: italic;
+}
+
+.champion-card .team-placeholder,
+.champion-card strong > span,
+.champion-card strong {
+  align-items: center;
+  display: inline-flex;
+  gap: var(--space-2);
+}
+
+.sim-group-table h3 {
+  font-size: 1.05rem;
+  font-weight: 950;
+  letter-spacing: -0.035em;
+  margin: 0 0 var(--space-3);
+}
+
+.sim-group-table ol {
+  display: grid;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sim-group-table li {
+  align-items: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  gap: var(--space-2);
+  justify-content: space-between;
+  min-width: 0;
+  padding: 0.62rem 0.7rem;
+}
+
+.sim-group-table li.is-qualified {
+  border-color: color-mix(in srgb, var(--color-primary), transparent 65%);
+}
+
+.sim-group-table li.is-third {
+  border-style: dashed;
+}
+
+.standing-team,
+.sim-group-table li span:first-child {
+  align-items: center;
+  display: inline-flex;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.standing-team span,
+.sim-group-table li span:first-child span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sim-group-table strong {
+  align-items: center;
+  background: var(--color-primary-soft);
+  border-radius: var(--radius-full);
+  color: var(--color-primary);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 0.9rem;
+  font-weight: 950;
+  height: 1.85rem;
+  justify-content: center;
+  min-width: 1.85rem;
+  padding: 0 0.45rem;
+}
+
+@media (max-width: 560px) {
+  .sim-options {
+    grid-template-columns: 1fr;
+  }
+
+  .sim-versus {
+    justify-self: center;
+  }
+
+  .sim-round {
+    padding: var(--space-3);
+  }
+}
+
+@media (min-width: 780px) {
+  .sim-round-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sim-groups-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1120px) {
+  .sim-round-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .sim-groups-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

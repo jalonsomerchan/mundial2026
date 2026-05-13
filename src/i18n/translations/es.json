@@ -90,6 +90,7 @@
   "simulator.realResult": "Resultado real",
   "simulator.pending": "Pendiente",
   "simulator.reset": "Reiniciar simulación",
+  "simulator.randomize": "Generar aleatoriamente",
   "simulator.noChampion": "Elige ganadores hasta la final",
   "simulator.unresolvedTeam": "Por decidir",
   "simulator.groupStage": "Fase de grupos",

@@ -1,0 +1,51 @@
+---
+interface Props {
+  label: string;
+}
+
+const { label } = Astro.props;
+---
+
+<div class="simulator-randomizer">
+  <button class="random-button" type="button" data-randomize-simulator>{label}</button>
+</div>
+
+<script>
+  const randomizeButton = document.querySelector('[data-randomize-simulator]');
+
+  function getAvailableMatches() {
+    const buttons = [...document.querySelectorAll('[data-pick]:not(:disabled)')];
+    const matches = new Map();
+
+    buttons.forEach((button) => {
+      const matchId = button.getAttribute('data-pick');
+      const team = button.getAttribute('data-team');
+
+      if (!matchId || !team) return;
+
+      const matchButtons = matches.get(matchId) ?? [];
+      matchButtons.push(button);
+      matches.set(matchId, matchButtons);
+    });
+
+    return [...matches.values()].filter((matchButtons) => matchButtons.length > 0);
+  }
+
+  function randomizeSimulator() {
+    let guard = 0;
+
+    while (guard < 256) {
+      const availableMatches = getAvailableMatches();
+      if (availableMatches.length === 0) break;
+
+      availableMatches.forEach((matchButtons) => {
+        const winnerButton = matchButtons[Math.floor(Math.random() * matchButtons.length)];
+        winnerButton?.click();
+      });
+
+      guard += 1;
+    }
+  }
+
+  randomizeButton?.addEventListener('click', randomizeSimulator);
+</script>

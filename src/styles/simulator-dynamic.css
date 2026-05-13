@@ -1,3 +1,30 @@
+.simulator-randomizer {
+  display: flex;
+  justify-content: flex-end;
+  margin: var(--space-8) 0 calc(var(--space-8) * -1);
+  position: relative;
+  z-index: 5;
+}
+
+.random-button {
+  background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+  border: 1px solid color-mix(in srgb, var(--color-accent), #fff 42%);
+  border-radius: var(--radius-full);
+  box-shadow: 0 16px 42px color-mix(in srgb, var(--color-primary), transparent 70%);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 950;
+  min-height: 3.15rem;
+  padding: 0.9rem 1.25rem;
+  transition: box-shadow var(--transition-base), transform var(--transition-fast);
+}
+
+.random-button:hover {
+  box-shadow: 0 20px 50px color-mix(in srgb, var(--color-primary), transparent 62%);
+  transform: translateY(-1px);
+}
+
 .simulator-board {
   display: grid;
   gap: var(--space-6);
@@ -303,6 +330,15 @@
 }
 
 @media (max-width: 560px) {
+  .simulator-randomizer {
+    justify-content: stretch;
+    margin: var(--space-5) 0 calc(var(--space-5) * -1);
+  }
+
+  .random-button {
+    width: 100%;
+  }
+
   .sim-options {
     grid-template-columns: 1fr;
   }

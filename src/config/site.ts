@@ -11,7 +11,7 @@ export const localeLabels: Record<Locale, string> = {
 export const siteConfig = {
   name: 'Mundial 2026',
   description: 'Consulta partidos, grupos, sedes y selecciones del Mundial 2026.',
-  url: import.meta.env.ASTRO_SITE ?? 'https://jalonsomerchan.github.io',
+  url: import.meta.env.ASTRO_SITE ?? 'https://mundial2026.alon.one',
   base: import.meta.env.ASTRO_BASE ?? '/',
   author: 'Jorge Alonso',
   defaultLocale,

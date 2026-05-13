@@ -1,6 +1,7 @@
 import type { Locale } from '../config/site';
 import type { WorldCupGroup, WorldCupMatch } from '../data/worldcup2026';
 import { getLocalizedPath, translate } from '../i18n/ui';
+import { normalizeSlug } from './slugs';
 
 export interface TeamStanding {
   team: string;
@@ -12,15 +13,6 @@ export interface TeamStanding {
   goalsAgainst: number;
   goalDifference: number;
   points: number;
-}
-
-function normalizeSlug(value: string) {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
 }
 
 export function getGroupSlug(groupName: string) {

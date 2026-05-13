@@ -168,7 +168,7 @@ describe('project smoke checks', () => {
     assert.match(explorer, /getCountryFlagUrl/);
   });
 
-  it('keeps professional match cards with local time and results', () => {
+  it('keeps minimal match cards readable with local time and results', () => {
     const dataHelper = readText('src/data/worldcup2026.ts');
     const matchCard = readText('src/components/MatchCard.astro');
     const matchUtils = readText('src/utils/matches.ts');
@@ -176,8 +176,10 @@ describe('project smoke checks', () => {
 
     assert.match(dataHelper, /score1\?: number/);
     assert.match(dataHelper, /score2\?: number/);
-    assert.match(matchCard, /scoreboard/);
-    assert.match(matchCard, /getMatchResult/);
+    assert.match(matchCard, /team-row/);
+    assert.match(matchCard, /team-score/);
+    assert.match(matchCard, /white-space:\s*nowrap/);
+    assert.doesNotMatch(matchCard, /overflow-wrap:\s*anywhere/);
     assert.match(matchCard, /js-local-time/);
     assert.match(matchUtils, /return '-'/);
     assert.match(explorer, /Intl\.DateTimeFormat/);

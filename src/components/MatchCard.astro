@@ -199,21 +199,38 @@ function getTeamLabel(team: string) {
 
   .match-link {
     align-items: center;
-    background: var(--color-primary);
-    border-radius: var(--radius-full);
-    color: #fff;
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    color: var(--color-text);
     display: inline-flex;
-    font-weight: 850;
+    font-size: 0.95rem;
+    font-weight: 750;
+    gap: var(--space-2);
     justify-content: center;
     margin-top: var(--space-4);
-    min-height: 2.75rem;
-    padding: 0.7rem 1rem;
+    min-height: 2.55rem;
+    padding: 0.65rem 0.95rem;
     text-decoration: none;
+    transition:
+      background-color var(--transition-base),
+      border-color var(--transition-base),
+      color var(--transition-base),
+      transform var(--transition-fast);
     width: 100%;
   }
 
+  .match-link::after {
+    content: '›';
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
   .match-link:hover {
-    background: var(--color-primary-hover);
+    background: var(--color-primary-soft);
+    border-color: color-mix(in srgb, var(--color-primary), transparent 55%);
+    color: var(--color-primary);
+    transform: translateY(-1px);
   }
 
   @media (min-width: 560px) {

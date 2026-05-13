@@ -1,6 +1,7 @@
 ---
 import type { Locale } from '../config/site';
 import type { WorldCupSummary } from '../data/worldcup2026';
+import { getCountryFlagUrl, getCountryName } from '../i18n/countries';
 import { useTranslations } from '../i18n/ui';
 
 interface Props {
@@ -14,7 +15,7 @@ const groupMatches = summary.matches.filter((match) => match.group);
 const knockoutMatches = summary.matches.filter((match) => !match.group);
 const highlightedMatches = summary.matches.slice(0, 8);
 const featuredTeams = [...new Set(groupMatches.flatMap((match) => [match.team1, match.team2]))].sort((a, b) =>
-  a.localeCompare(b)
+  getCountryName(a, locale).localeCompare(getCountryName(b, locale), locale)
 );
 const dateFormatter = new Intl.DateTimeFormat(locale, {
   day: 'numeric',
@@ -24,6 +25,14 @@ const dateFormatter = new Intl.DateTimeFormat(locale, {
 
 function formatDate(date: string) {
   return dateFormatter.format(new Date(`${date}T12:00:00Z`));
+}
+
+function getTeamLabel(team: string) {
+  return getCountryName(team, locale);
+}
+
+function getTeamFlag(team: string) {
+  return getCountryFlagUrl(team);
 }
 ---
 
@@ -76,7 +85,21 @@ function formatDate(date: string) {
           <span>{match.group ?? match.round}</span>
           <time datetime={match.date}>{formatDate(match.date)}</time>
         </div>
-        <h3>{match.team1} <span>{t('home.versus')}</span> {match.team2}</h3>
+        <h3 class="match-title">
+          <span class="team-name">
+            {getTeamFlag(match.team1) && (
+              <img src={getTeamFlag(match.team1) ?? ''} width="28" height="28" alt="" loading="lazy" decoding="async" />
+            )}
+            {getTeamLabel(match.team1)}
+          </span>
+          <span class="versus">{t('home.versus')}</span>
+          <span class="team-name">
+            {getTeamFlag(match.team2) && (
+              <img src={getTeamFlag(match.team2) ?? ''} width="28" height="28" alt="" loading="lazy" decoding="async" />
+            )}
+            {getTeamLabel(match.team2)}
+          </span>
+        </h3>
         <dl>
           <div>
             <dt>{t('home.round')}</dt>
@@ -111,7 +134,16 @@ function formatDate(date: string) {
           <span>{group.matches.length} {t('home.groupMatches')}</span>
         </div>
         <ul aria-label={`${t('home.teamsInGroup')} ${group.name}`}>
-          {group.teams.map((team) => <li>{team}</li>)}
+          {group.teams.map((team) => (
+            <li>
+              <span class="team-name">
+                {getTeamFlag(team) && (
+                  <img src={getTeamFlag(team) ?? ''} width="24" height="24" alt="" loading="lazy" decoding="async" />
+                )}
+                {getTeamLabel(team)}
+              </span>
+            </li>
+          ))}
         </ul>
       </article>
     ))}
@@ -132,7 +164,18 @@ function formatDate(date: string) {
     </article>
     <article class="list-card">
       <h3>{t('home.teamsListTitle')}</h3>
-      <p>{featuredTeams.slice(0, 18).join(', ')}</p>
+      <ul class="team-cloud" aria-label={t('home.teamsListTitle')}>
+        {featuredTeams.slice(0, 18).map((team) => (
+          <li>
+            <span class="team-pill">
+              {getTeamFlag(team) && (
+                <img src={getTeamFlag(team) ?? ''} width="22" height="22" alt="" loading="lazy" decoding="async" />
+              )}
+              {getTeamLabel(team)}
+            </span>
+          </li>
+        ))}
+      </ul>
     </article>
   </div>
 </section>
@@ -359,9 +402,27 @@ function formatDate(date: string) {
     padding: 0.35rem 0.7rem;
   }
 
-  .match-card h3 span {
+  .match-title {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .versus {
     color: var(--color-text-soft);
     font-size: 0.82em;
+  }
+
+  .team-name,
+  .team-pill {
+    align-items: center;
+    display: inline-flex;
+    gap: var(--space-2);
+  }
+
+  .team-name img,
+  .team-pill img {
+    border-radius: var(--radius-full);
+    flex: 0 0 auto;
   }
 
   dl {
@@ -383,7 +444,8 @@ function formatDate(date: string) {
     font-weight: 650;
   }
 
-  .group-card ul {
+  .group-card ul,
+  .team-cloud {
     display: grid;
     gap: var(--space-2);
     list-style: none;
@@ -396,6 +458,22 @@ function formatDate(date: string) {
     color: var(--color-text-muted);
     font-weight: 750;
     padding-top: var(--space-2);
+  }
+
+  .team-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: var(--space-4);
+  }
+
+  .team-pill {
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    font-weight: 750;
+    padding: 0.35rem 0.7rem;
   }
 
   .split-block {

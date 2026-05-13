@@ -15,7 +15,12 @@ const summary = await getWorldCupSummary();
 
 <BaseLayout title={t('simulator.metaTitle')} description={t('simulator.metaDescription')} locale={locale}>
   <Container>
-    <SimulatorRandomizer label={t('simulator.randomize')} />
+    <SimulatorRandomizer
+      randomizeLabel={t('simulator.randomize')}
+      shareLabel={t('simulator.share')}
+      clearLabel={t('simulator.clearPrediction')}
+      copiedLabel={t('simulator.shareCopied')}
+    />
     <WorldCupSimulator locale={locale} summary={summary} />
   </Container>
 </BaseLayout>

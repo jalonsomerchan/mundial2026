@@ -13,14 +13,14 @@ const homeUrl = getLocalizedPath('/', locale);
 const alternateLocales = getAlternateLocales(locale);
 ---
 
-<header class="border-b border-[var(--color-border)] bg-white/80 backdrop-blur">
-  <Container class="flex items-center justify-between py-4">
-    <a class="font-bold tracking-tight" href={homeUrl}>{siteConfig.name}</a>
-    <nav aria-label="Navegación principal" class="flex items-center gap-4 text-sm text-[var(--color-muted)]">
-      <a class="hover:text-[var(--color-text)]" href={homeUrl}>{t('nav.home')}</a>
+<header class="border-b border-[var(--color-border)] bg-[var(--color-surface)]/85 backdrop-blur">
+  <Container class="flex items-center justify-between gap-4 py-4">
+    <a class="font-black tracking-tight text-[var(--color-text)]" href={homeUrl}>{siteConfig.name}</a>
+    <nav aria-label="Navegación principal" class="flex items-center gap-3 text-sm text-[var(--color-text-muted)]">
+      <a class="font-semibold hover:text-[var(--color-text)]" href={homeUrl}>{t('nav.home')}</a>
       {alternateLocales.map((alternateLocale) => (
         <a
-          class="rounded-full border border-[var(--color-border)] px-3 py-1 text-xs hover:text-[var(--color-text)]"
+          class="rounded-full border border-[var(--color-border)] px-3 py-1 text-xs font-bold hover:text-[var(--color-text)]"
           href={getLocalizedPath('/', alternateLocale)}
           hreflang={alternateLocale}
         >

@@ -24,6 +24,9 @@ const { randomizeLabel, shareLabel, clearLabel, copiedLabel } = Astro.props;
   const clearButton = document.querySelector('[data-clear-simulator]');
   const feedback = document.querySelector('[data-share-feedback]');
 
+  // El aleatorio pesado anterior usaba getAvailableMatches y disparaba muchos clicks con Math.random.
+  // Ahora se delega en worldCupSimulator.randomize(), que calcula la predicción sin escanear el DOM.
+
   function encodePrediction(prediction) {
     const json = JSON.stringify(prediction);
     const bytes = new TextEncoder().encode(json);
@@ -49,18 +52,14 @@ const { randomizeLabel, shareLabel, clearLabel, copiedLabel } = Astro.props;
     }
   }
 
-  function getUrlPrediction() {
-    const params = new URLSearchParams(window.location.search);
-    const sharedPrediction = params.get(predictionQueryKey);
-
-    return sharedPrediction ? decodePrediction(sharedPrediction) : null;
-  }
-
   function loadSharedPrediction() {
-    const sharedPrediction = getUrlPrediction();
+    const sharedPrediction = new URLSearchParams(window.location.search).get(predictionQueryKey);
+    if (!sharedPrediction) return;
 
-    if (sharedPrediction) {
-      localStorage.setItem(storageKey, JSON.stringify(sharedPrediction));
+    const prediction = decodePrediction(sharedPrediction);
+    if (prediction) {
+      localStorage.setItem(storageKey, JSON.stringify(prediction));
+      document.dispatchEvent(new CustomEvent('simulator:picks-loaded'));
     }
   }
 
@@ -77,8 +76,7 @@ const { randomizeLabel, shareLabel, clearLabel, copiedLabel } = Astro.props;
 
   function buildShareUrl() {
     const url = new URL(window.location.href);
-    const prediction = getStoredPrediction();
-    url.searchParams.set(predictionQueryKey, encodePrediction(prediction));
+    url.searchParams.set(predictionQueryKey, encodePrediction(getStoredPrediction()));
     url.hash = '';
 
     return url.toString();
@@ -108,44 +106,14 @@ const { randomizeLabel, shareLabel, clearLabel, copiedLabel } = Astro.props;
     window.history.replaceState({}, '', url);
   }
 
-  function getAvailableMatches() {
-    const buttons = [...document.querySelectorAll('[data-pick]:not(:disabled)')];
-    const matches = new Map();
-
-    buttons.forEach((button) => {
-      const matchId = button.getAttribute('data-pick');
-      const team = button.getAttribute('data-team');
-
-      if (!matchId || !team) return;
-
-      const matchButtons = matches.get(matchId) ?? [];
-      matchButtons.push(button);
-      matches.set(matchId, matchButtons);
-    });
-
-    return [...matches.values()].filter((matchButtons) => matchButtons.length > 0);
-  }
-
   function randomizeSimulator() {
-    let guard = 0;
-
-    while (guard < 256) {
-      const availableMatches = getAvailableMatches();
-      if (availableMatches.length === 0) break;
-
-      availableMatches.forEach((matchButtons) => {
-        const winnerButton = matchButtons[Math.floor(Math.random() * matchButtons.length)];
-        winnerButton?.click();
-      });
-
-      guard += 1;
-    }
+    window.worldCupSimulator?.randomize();
   }
 
   function clearPrediction() {
     localStorage.removeItem(storageKey);
     cleanPredictionUrl();
-    document.querySelector('[data-reset-simulator]')?.click();
+    window.worldCupSimulator?.clear();
 
     if (feedback) {
       feedback.textContent = '';

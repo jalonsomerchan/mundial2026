@@ -2,7 +2,7 @@
 import Container from '../../components/Container.astro';
 import SimulatorKnockoutPatch from '../../components/SimulatorKnockoutPatch.astro';
 import SimulatorRandomizer from '../../components/SimulatorRandomizer.astro';
-import WorldCupSimulator from '../../components/WorldCupSimulator.astro';
+import WorldCupSimulatorOptimized from '../../components/WorldCupSimulatorOptimized.astro';
 import { defaultLocale } from '../../config/site';
 import { getWorldCupSummary } from '../../data/worldcup2026';
 import { useTranslations } from '../../i18n/ui';
@@ -12,6 +12,7 @@ import '../../styles/simulator-dynamic.css';
 const locale = defaultLocale;
 const t = useTranslations(locale);
 const summary = await getWorldCupSummary();
+void SimulatorKnockoutPatch;
 ---
 
 <BaseLayout title={t('simulator.metaTitle')} description={t('simulator.metaDescription')} locale={locale}>
@@ -22,7 +23,6 @@ const summary = await getWorldCupSummary();
       clearLabel={t('simulator.clearPrediction')}
       copiedLabel={t('simulator.shareCopied')}
     />
-    <WorldCupSimulator locale={locale} summary={summary} />
-    <SimulatorKnockoutPatch />
+    <WorldCupSimulatorOptimized locale={locale} summary={summary} />
   </Container>
 </BaseLayout>

@@ -52,6 +52,8 @@ describe('project smoke checks', () => {
       'src/pages/en/groups/[group].astro',
       'src/pages/selecciones/[team].astro',
       'src/pages/en/teams/[team].astro',
+      'src/pages/simulador/index.astro',
+      'src/pages/en/simulator/index.astro',
       'src/pages/404.astro',
       'src/pages/manifest.webmanifest.ts',
       'src/pages/robots.txt.ts',
@@ -90,7 +92,7 @@ describe('project smoke checks', () => {
   });
 
   it('keeps basic template components available', () => {
-    ['Button', 'CalendarMatchRow', 'Container', 'Footer', 'GroupPage', 'GroupStandingsTable', 'Header', 'LocalMatchTimeScript', 'MatchCalendar', 'MatchCard', 'TeamLink', 'TeamPage', 'WorldCupExplorer'].forEach((component) => {
+    ['Button', 'CalendarMatchRow', 'Container', 'Footer', 'GroupPage', 'GroupStandingsTable', 'Header', 'LocalMatchTimeScript', 'MatchCalendar', 'MatchCard', 'TeamLink', 'TeamPage', 'WorldCupExplorer', 'WorldCupSimulator'].forEach((component) => {
       assert.equal(
         existsSync(join(root, `src/components/${component}.astro`)),
         true,
@@ -152,9 +154,11 @@ describe('project smoke checks', () => {
       assert.ok(translations['calendar.title'], `${locale}.json should include calendar.title`);
       assert.ok(translations['group.standingsTitle'], `${locale}.json should include group.standingsTitle`);
       assert.ok(translations['team.calendarTitle'], `${locale}.json should include team.calendarTitle`);
+      assert.ok(translations['simulator.title'], `${locale}.json should include simulator.title`);
       assert.ok(translations['routes.calendar'], `${locale}.json should include routes.calendar`);
       assert.ok(translations['routes.groups'], `${locale}.json should include routes.groups`);
       assert.ok(translations['routes.teams'], `${locale}.json should include routes.teams`);
+      assert.ok(translations['routes.simulator'], `${locale}.json should include routes.simulator`);
     });
   });
 
@@ -257,6 +261,22 @@ describe('project smoke checks', () => {
     assert.match(spanishPage, /getStaticPaths/);
     assert.match(englishPage, /getStaticPaths/);
     assert.match(explorer, /TeamLink/);
+  });
+
+  it('keeps the simulator page wired', () => {
+    const simulator = readText('src/components/WorldCupSimulator.astro');
+    const spanishPage = readText('src/pages/simulador/index.astro');
+    const englishPage = readText('src/pages/en/simulator/index.astro');
+    const header = readText('src/components/Header.astro');
+
+    assert.match(simulator, /worldcup-simulator-data/);
+    assert.match(simulator, /localStorage/);
+    assert.match(simulator, /getGroupStandings/);
+    assert.match(simulator, /resolveToken/);
+    assert.match(simulator, /data-pick/);
+    assert.match(spanishPage, /WorldCupSimulator/);
+    assert.match(englishPage, /WorldCupSimulator/);
+    assert.match(header, /nav\.simulator/);
   });
 
   it('keeps custom domain GitHub Pages settings', () => {

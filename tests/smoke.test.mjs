@@ -99,7 +99,7 @@ describe('project smoke checks', () => {
   });
 
   it('keeps basic template components available', () => {
-    ['Button', 'CalendarMatchRow', 'Container', 'Footer', 'GroupPage', 'GroupStandingsTable', 'Header', 'LocalMatchTimeScript', 'MatchCalendar', 'MatchCard', 'MatchDetailPage', 'SimulatorRandomizer', 'TeamLink', 'TeamPage', 'VenueLink', 'VenuePage', 'WorldCupExplorer', 'WorldCupSimulator'].forEach((component) => {
+    ['Button', 'CalendarMatchRow', 'Container', 'Footer', 'GroupPage', 'GroupStandingsTable', 'Header', 'LocalMatchTimeScript', 'MatchCalendar', 'MatchCard', 'MatchDetailPage', 'MatchScoreboard', 'SimulatorRandomizer', 'TeamLink', 'TeamPage', 'VenueLink', 'VenuePage', 'WorldCupExplorer', 'WorldCupSimulator'].forEach((component) => {
       assert.equal(
         existsSync(join(root, `src/components/${component}.astro`)),
         true,
@@ -286,6 +286,7 @@ describe('project smoke checks', () => {
 
   it('keeps match and venue detail pages wired', () => {
     const matchPage = readText('src/components/MatchDetailPage.astro');
+    const scoreboard = readText('src/components/MatchScoreboard.astro');
     const venuePage = readText('src/components/VenuePage.astro');
     const venueLink = readText('src/components/VenueLink.astro');
     const venuesUtils = readText('src/utils/venues.ts');
@@ -294,10 +295,12 @@ describe('project smoke checks', () => {
     const spanishVenuePage = readText('src/pages/sedes/[venue].astro');
     const englishVenuePage = readText('src/pages/en/venues/[venue].astro');
 
-    assert.match(matchPage, /TeamLink/);
+    assert.match(matchPage, /MatchScoreboard/);
     assert.match(matchPage, /VenueLink/);
     assert.match(matchPage, /getGroupPath/);
     assert.match(matchPage, /getLocalizedRoutePath/);
+    assert.match(scoreboard, /TeamLink/);
+    assert.match(scoreboard, /getMatchResult/);
     assert.match(venuePage, /CalendarMatchRow/);
     assert.match(venueLink, /getVenuePath/);
     assert.match(venuesUtils, /getVenuePath/);

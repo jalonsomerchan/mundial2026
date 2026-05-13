@@ -1,0 +1,170 @@
+---
+import CalendarMatchRow from './CalendarMatchRow.astro';
+import LocalMatchTimeScript from './LocalMatchTimeScript.astro';
+import type { Locale } from '../config/site';
+import type { MatchDay } from '../utils/calendar';
+import { useTranslations } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+  days: MatchDay[];
+}
+
+const { locale, days } = Astro.props;
+const t = useTranslations(locale);
+const dateFormatter = new Intl.DateTimeFormat(locale, {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
+function formatDay(date: string) {
+  return dateFormatter.format(new Date(`${date}T12:00:00Z`));
+}
+---
+
+<div class="calendar-page">
+  <header class="calendar-hero">
+    <p class="eyebrow">{t('calendar.eyebrow')}</p>
+    <h1>{t('calendar.title')}</h1>
+    <p>{t('calendar.description')}</p>
+  </header>
+
+  <nav class="day-nav" aria-label={t('calendar.dayNavigation')}>
+    {days.map((day) => (
+      <a href={`#day-${day.date}`}>{formatDay(day.date)}</a>
+    ))}
+  </nav>
+
+  <div class="calendar-list">
+    {days.map((day) => (
+      <section id={`day-${day.date}`} class="day-section" aria-labelledby={`heading-${day.date}`}>
+        <header class="day-heading">
+          <div>
+            <p class="eyebrow">{t('calendar.dayLabel')}</p>
+            <h2 id={`heading-${day.date}`}>{formatDay(day.date)}</h2>
+          </div>
+          <span>{day.matches.length} {day.matches.length === 1 ? t('calendar.matchSingular') : t('calendar.matchPlural')}</span>
+        </header>
+        <div class="day-matches">
+          {day.matches.map((match) => <CalendarMatchRow locale={locale} match={match} />)}
+        </div>
+      </section>
+    ))}
+  </div>
+</div>
+
+<LocalMatchTimeScript />
+
+<style>
+  .calendar-page {
+    padding: var(--space-16) 0;
+  }
+
+  .calendar-hero {
+    max-width: 48rem;
+    margin-bottom: var(--space-8);
+  }
+
+  .eyebrow {
+    margin: 0 0 var(--space-3);
+    color: var(--color-primary);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  h1,
+  h2,
+  p {
+    margin-top: 0;
+  }
+
+  h1 {
+    margin-bottom: var(--space-5);
+    font-size: clamp(2.4rem, 11vw, 4.8rem);
+    font-weight: 900;
+    letter-spacing: -0.075em;
+    line-height: 0.95;
+  }
+
+  .calendar-hero p:not(.eyebrow) {
+    color: var(--color-text-muted);
+    font-size: 1.05rem;
+    line-height: 1.75;
+  }
+
+  .day-nav {
+    display: flex;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-8);
+    overflow-x: auto;
+    padding-bottom: var(--space-2);
+    scroll-snap-type: x proximity;
+  }
+
+  .day-nav a {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    color: var(--color-text-muted);
+    flex: 0 0 auto;
+    font-size: 0.86rem;
+    font-weight: 800;
+    padding: 0.55rem 0.85rem;
+    scroll-snap-align: start;
+    text-decoration: none;
+  }
+
+  .day-nav a:hover {
+    border-color: var(--color-border-strong);
+    color: var(--color-text);
+  }
+
+  .calendar-list {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .day-section {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-xs);
+    padding: var(--space-5);
+  }
+
+  .day-heading {
+    align-items: start;
+    display: flex;
+    gap: var(--space-4);
+    justify-content: space-between;
+    margin-bottom: var(--space-5);
+  }
+
+  .day-heading h2 {
+    font-size: clamp(1.45rem, 6vw, 2.35rem);
+    font-weight: 900;
+    letter-spacing: -0.055em;
+    line-height: 1.05;
+    margin-bottom: 0;
+    text-transform: capitalize;
+  }
+
+  .day-heading > span {
+    background: var(--color-primary-soft);
+    border-radius: var(--radius-full);
+    color: var(--color-primary);
+    flex: 0 0 auto;
+    font-size: 0.8rem;
+    font-weight: 850;
+    padding: 0.35rem 0.7rem;
+  }
+
+  .day-matches {
+    display: grid;
+    gap: var(--space-3);
+  }
+</style>

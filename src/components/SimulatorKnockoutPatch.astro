@@ -153,6 +153,22 @@
     return getRealWinner(match, context) || getPickedWinner(match, context);
   }
 
+  function renderTeam(team) {
+    if (!team) return simulatorLabels.noChampion || '';
+    const flag = team.flag ? `<img src="${team.flag}" width="30" height="30" alt="" loading="lazy" decoding="async">` : '';
+    return `${flag}<span>${team.label || team.raw}</span>`;
+  }
+
+  function patchChampion(context) {
+    const finalMatch = simulatorMatches.find((match) => /final/i.test(match.round));
+    const champion = finalMatch ? getWinner(finalMatch, context) : null;
+    const championNode = document.querySelector('[data-simulator-champion]');
+
+    if (championNode) {
+      championNode.innerHTML = champion ? renderTeam(champion) : (simulatorLabels.noChampion || '');
+    }
+  }
+
   function patchMatch(match, context) {
     const buttons = [...document.querySelectorAll(`[data-pick="${match.id}"]`)];
     if (buttons.length < 2) return;
@@ -191,6 +207,7 @@
   function patchKnockouts() {
     const context = buildContext();
     simulatorMatches.filter((match) => !match.group).forEach((match) => patchMatch(match, context));
+    patchChampion(context);
   }
 
   document.addEventListener('click', (event) => {

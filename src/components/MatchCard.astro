@@ -1,7 +1,8 @@
 ---
+import TeamLink from './TeamLink.astro';
 import type { Locale } from '../config/site';
 import type { WorldCupMatch } from '../data/worldcup2026';
-import { getCountryFlagUrl, getCountryName } from '../i18n/countries';
+import { getCountryName } from '../i18n/countries';
 import { useTranslations } from '../i18n/ui';
 import { getMatchResult, getMatchUtcIso } from '../utils/matches';
 
@@ -17,10 +18,6 @@ const result = getMatchResult(match);
 
 function getTeamLabel(team: string) {
   return getCountryName(team, locale);
-}
-
-function getTeamFlag(team: string) {
-  return getCountryFlagUrl(team);
 }
 ---
 
@@ -39,22 +36,12 @@ function getTeamFlag(team: string) {
 
   <div class="scoreboard" aria-label={`${getTeamLabel(match.team1)} ${result} ${getTeamLabel(match.team2)}`}>
     <div class="team-row">
-      <span class="team-info">
-        {getTeamFlag(match.team1) && (
-          <img src={getTeamFlag(match.team1) ?? ''} width="34" height="34" alt="" loading="lazy" decoding="async" />
-        )}
-        <strong>{getTeamLabel(match.team1)}</strong>
-      </span>
+      <strong class="team-info"><TeamLink locale={locale} team={match.team1} flagSize={34} /></strong>
       <span class="team-score" aria-label={`${t('home.result')}: ${result}`}>{result === '-' ? '-' : result.split(' - ')[0]}</span>
     </div>
 
     <div class="team-row">
-      <span class="team-info">
-        {getTeamFlag(match.team2) && (
-          <img src={getTeamFlag(match.team2) ?? ''} width="34" height="34" alt="" loading="lazy" decoding="async" />
-        )}
-        <strong>{getTeamLabel(match.team2)}</strong>
-      </span>
+      <strong class="team-info"><TeamLink locale={locale} team={match.team2} flagSize={34} /></strong>
       <span class="team-score">{result === '-' ? '-' : result.split(' - ')[1]}</span>
     </div>
   </div>
@@ -152,18 +139,6 @@ function getTeamFlag(team: string) {
   }
 
   .team-info {
-    align-items: center;
-    display: flex;
-    gap: var(--space-3);
-    min-width: 0;
-  }
-
-  .team-info img {
-    border-radius: var(--radius-full);
-    flex: 0 0 auto;
-  }
-
-  .team-info strong {
     color: var(--color-text);
     display: block;
     font-size: clamp(1.05rem, 4.6vw, 1.35rem);
@@ -171,9 +146,6 @@ function getTeamFlag(team: string) {
     letter-spacing: -0.03em;
     line-height: 1.15;
     min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
   .team-score {

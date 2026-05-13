@@ -1,0 +1,57 @@
+---
+import type { Locale } from '../config/site';
+import { getCountryFlagUrl, getCountryName, isKnownCountry } from '../i18n/countries';
+import { getTeamPath } from '../utils/teams';
+
+interface Props {
+  locale: Locale;
+  team: string;
+  flagSize?: number;
+  class?: string;
+}
+
+const { locale, team, flagSize = 24 } = Astro.props;
+const className = Astro.props.class ?? '';
+const teamLabel = getCountryName(team, locale);
+const flagUrl = getCountryFlagUrl(team);
+const teamUrl = isKnownCountry(team) ? getTeamPath(team, locale) : null;
+---
+
+{teamUrl ? (
+  <a class={`team-link ${className}`} href={teamUrl}>
+    {flagUrl && <img src={flagUrl} width={flagSize} height={flagSize} alt="" loading="lazy" decoding="async" />}
+    <span>{teamLabel}</span>
+  </a>
+) : (
+  <span class={`team-link ${className}`}>
+    {flagUrl && <img src={flagUrl} width={flagSize} height={flagSize} alt="" loading="lazy" decoding="async" />}
+    <span>{teamLabel}</span>
+  </span>
+)}
+
+<style>
+  .team-link {
+    align-items: center;
+    color: inherit;
+    display: inline-flex;
+    gap: var(--space-2);
+    min-width: 0;
+    text-decoration: none;
+  }
+
+  a.team-link:hover span {
+    color: var(--color-primary);
+  }
+
+  .team-link img {
+    border-radius: var(--radius-full);
+    flex: 0 0 auto;
+  }
+
+  .team-link span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+</style>

@@ -45,9 +45,9 @@ describe('simulator performance checks', () => {
   });
 
   it('adds rendering containment for the simulator board', () => {
-    const styles = readText('src/styles/simulator-performance.css');
+    const component = readText('src/components/WorldCupSimulatorOptimized.astro');
 
-    assert.match(styles, /content-visibility:\s*auto/);
-    assert.match(styles, /contain-intrinsic-size/);
+    assert.match(component, /content-visibility:\s*auto/);
+    assert.match(component, /contain-intrinsic-size/);
   });
 });

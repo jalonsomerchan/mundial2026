@@ -151,6 +151,17 @@ describe('project smoke checks', () => {
     assert.match(home, /getWorldCupSummary/);
   });
 
+  it('keeps custom domain GitHub Pages settings', () => {
+    const pagesWorkflow = readText('.github/workflows/pages.yml');
+    const cname = readText('public/CNAME').trim();
+    const siteConfig = readText('src/config/site.ts');
+
+    assert.equal(cname, 'mundial2026.alon.one');
+    assert.match(pagesWorkflow, /ASTRO_SITE:\s*https:\/\/mundial2026\.alon\.one/);
+    assert.match(pagesWorkflow, /ASTRO_BASE:\s*\//);
+    assert.match(siteConfig, /https:\/\/mundial2026\.alon\.one/);
+  });
+
   it('includes GitHub workflows for CI and Pages', () => {
     const pagesWorkflow = readText('.github/workflows/pages.yml');
     const ciWorkflow = readText('.github/workflows/ci.yml');

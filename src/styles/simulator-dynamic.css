@@ -9,6 +9,79 @@
   z-index: 5;
 }
 
+.simulator-shell {
+  padding: var(--space-16) 0 !important;
+}
+
+.simulator-hero {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: var(--color-text) !important;
+  display: grid !important;
+  gap: var(--space-8) !important;
+  margin-bottom: 0 !important;
+  overflow: visible !important;
+  padding: 0 0 var(--space-10) !important;
+}
+
+.simulator-hero .hero-glow,
+.simulator-hero .hero-orb {
+  display: none !important;
+}
+
+.simulator-hero .hero-content,
+.simulator-hero .hero-copy {
+  max-width: 48rem !important;
+  position: static !important;
+  z-index: auto !important;
+}
+
+.simulator-hero .eyebrow {
+  color: var(--color-primary) !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.16em !important;
+  margin: 0 0 var(--space-3) !important;
+  text-transform: uppercase !important;
+}
+
+.simulator-hero h1 {
+  color: var(--color-text) !important;
+  font-size: clamp(2.5rem, 12vw, 5.4rem) !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.075em !important;
+  line-height: 0.92 !important;
+  margin-bottom: var(--space-5) !important;
+  max-width: 48rem !important;
+}
+
+.simulator-hero p:not(.eyebrow) {
+  color: var(--color-text-muted) !important;
+  font-size: 1.05rem !important;
+  line-height: 1.75 !important;
+  max-width: 48rem !important;
+}
+
+.simulator-hero .reset-button {
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: none !important;
+  color: var(--color-text) !important;
+  font: inherit !important;
+  font-weight: 800 !important;
+  margin-top: var(--space-6) !important;
+  min-height: 2.9rem !important;
+  padding: 0.85rem 1.1rem !important;
+}
+
+.simulator-hero .reset-button:hover {
+  border-color: var(--color-border-strong) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
 .random-button,
 .share-button,
 .clear-button {

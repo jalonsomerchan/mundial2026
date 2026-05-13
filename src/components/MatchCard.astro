@@ -31,23 +31,24 @@ function getTeamFlag(team: string) {
   </header>
 
   <div class="scoreboard" aria-label={`${getTeamLabel(match.team1)} ${result} ${getTeamLabel(match.team2)}`}>
-    <div class="team team-home">
-      {getTeamFlag(match.team1) && (
-        <img src={getTeamFlag(match.team1) ?? ''} width="40" height="40" alt="" loading="lazy" decoding="async" />
-      )}
-      <span>{getTeamLabel(match.team1)}</span>
+    <div class="team-row">
+      <span class="team-info">
+        {getTeamFlag(match.team1) && (
+          <img src={getTeamFlag(match.team1) ?? ''} width="34" height="34" alt="" loading="lazy" decoding="async" />
+        )}
+        <strong>{getTeamLabel(match.team1)}</strong>
+      </span>
+      <span class="team-score" aria-label={`${t('home.result')}: ${result}`}>{result === '-' ? '-' : result.split(' - ')[0]}</span>
     </div>
 
-    <div class="result-box">
-      <span class="result-label">{t('home.result')}</span>
-      <strong>{result}</strong>
-    </div>
-
-    <div class="team team-away">
-      {getTeamFlag(match.team2) && (
-        <img src={getTeamFlag(match.team2) ?? ''} width="40" height="40" alt="" loading="lazy" decoding="async" />
-      )}
-      <span>{getTeamLabel(match.team2)}</span>
+    <div class="team-row">
+      <span class="team-info">
+        {getTeamFlag(match.team2) && (
+          <img src={getTeamFlag(match.team2) ?? ''} width="34" height="34" alt="" loading="lazy" decoding="async" />
+        )}
+        <strong>{getTeamLabel(match.team2)}</strong>
+      </span>
+      <span class="team-score">{result === '-' ? '-' : result.split(' - ')[1]}</span>
     </div>
   </div>
 
@@ -71,12 +72,11 @@ function getTeamFlag(team: string) {
 
 <style>
   .match-card {
-    background:
-      linear-gradient(145deg, color-mix(in srgb, var(--color-primary-soft), transparent 55%), transparent 44%),
-      var(--color-surface);
+    background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-2xl);
     box-shadow: var(--shadow-xs);
+    min-width: 0;
     overflow: hidden;
     padding: var(--space-5);
     transition:
@@ -111,72 +111,79 @@ function getTeamFlag(team: string) {
   }
 
   .scoreboard {
-    align-items: center;
-    display: grid;
-    gap: var(--space-4);
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .team {
-    align-items: center;
-    display: grid;
-    gap: var(--space-3);
-    grid-template-columns: auto minmax(0, 1fr);
-    min-width: 0;
-  }
-
-  .team img {
-    border-radius: var(--radius-full);
-    filter: drop-shadow(0 8px 16px rgb(15 23 42 / 0.12));
-  }
-
-  .team span {
-    color: var(--color-text);
-    font-size: clamp(1.3rem, 7vw, 2rem);
-    font-weight: 900;
-    letter-spacing: -0.04em;
-    line-height: 1;
-    overflow-wrap: anywhere;
-  }
-
-  .result-box {
-    align-items: center;
     background: var(--color-surface-soft);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-xl);
     display: grid;
-    justify-items: center;
-    min-height: 4.5rem;
-    padding: var(--space-3) var(--space-4);
+    gap: var(--space-2);
+    padding: var(--space-3);
   }
 
-  .result-label {
-    color: var(--color-text-soft);
-    font-size: 0.72rem;
-    font-weight: 850;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+  .team-row {
+    align-items: center;
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-width: 0;
   }
 
-  .result-box strong {
+  .team-info {
+    align-items: center;
+    display: flex;
+    gap: var(--space-3);
+    min-width: 0;
+  }
+
+  .team-info img {
+    border-radius: var(--radius-full);
+    flex: 0 0 auto;
+  }
+
+  .team-info strong {
     color: var(--color-text);
-    font-size: clamp(2rem, 10vw, 3rem);
+    display: block;
+    font-size: clamp(1.05rem, 4.6vw, 1.35rem);
+    font-weight: 850;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .team-score {
+    align-items: center;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    color: var(--color-text);
+    display: inline-flex;
+    font-size: 1.45rem;
     font-weight: 950;
-    letter-spacing: -0.08em;
+    justify-content: center;
     line-height: 1;
+    min-height: 2.75rem;
+    min-width: 3rem;
+    padding: 0 var(--space-3);
   }
 
   .match-details {
-    border-top: 1px solid var(--color-border);
     display: grid;
-    gap: var(--space-4);
-    margin: var(--space-5) 0 0;
-    padding-top: var(--space-5);
+    gap: var(--space-3);
+    margin: var(--space-4) 0 0;
+  }
+
+  .match-details div {
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3);
   }
 
   dt {
     color: var(--color-text-soft);
-    font-size: 0.76rem;
+    font-size: 0.7rem;
     font-weight: 850;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -184,24 +191,13 @@ function getTeamFlag(team: string) {
 
   dd {
     color: var(--color-text-muted);
+    font-size: 0.95rem;
     font-weight: 750;
+    line-height: 1.35;
     margin: var(--space-1) 0 0;
   }
 
   @media (min-width: 560px) {
-    .scoreboard {
-      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    }
-
-    .team-away {
-      grid-template-columns: minmax(0, 1fr) auto;
-      text-align: right;
-    }
-
-    .team-away img {
-      order: 2;
-    }
-
     .match-details {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }

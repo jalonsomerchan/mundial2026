@@ -40,6 +40,10 @@ export function useTranslations(locale: Locale) {
   };
 }
 
+export function translate(locale: Locale, key: TranslationKey): string {
+  return translations[locale]?.[key] ?? translations[defaultLocale][key] ?? key;
+}
+
 export function getLocalizedPath(path: string, locale: Locale): string {
   const basePath = import.meta.env.BASE_URL ?? '/';
   const cleanPath = path.replace(/^\//, '');
@@ -49,6 +53,10 @@ export function getLocalizedPath(path: string, locale: Locale): string {
   }
 
   return joinPaths(basePath, locale, cleanPath);
+}
+
+export function getLocalizedRoutePath(key: TranslationKey, locale: Locale): string {
+  return getLocalizedPath(translate(locale, key), locale);
 }
 
 export function getAlternateLocales(currentLocale: Locale) {

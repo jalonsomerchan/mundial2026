@@ -32,21 +32,6 @@ const featuredTeams = [...new Set(groupMatches.flatMap((match) => [match.team1, 
       <a class="btn btn-secondary" href="#teams">{t('home.viewTeams')}</a>
     </div>
   </div>
-
-  <aside class="stats-card" aria-label={t('home.summaryTitle')}>
-    <div>
-      <span>{summary.matches.length}</span>
-      <p>{t('home.statMatches')}</p>
-    </div>
-    <div>
-      <span>{summary.groups.length}</span>
-      <p>{t('home.statGroups')}</p>
-    </div>
-    <div>
-      <span>{summary.venues.length}</span>
-      <p>{t('home.statVenues')}</p>
-    </div>
-  </aside>
 </section>
 
 <section class="notice-card" aria-labelledby="data-source-title">
@@ -192,11 +177,7 @@ const featuredTeams = [...new Set(groupMatches.flatMap((match) => [match.team1, 
   .btn-primary { background: var(--color-primary); box-shadow: var(--shadow-sm); color: #fff; }
   .btn-primary:hover { background: var(--color-primary-hover); }
   .btn-secondary { background: var(--color-surface); border-color: var(--color-border); color: var(--color-text); }
-  .stats-card, .notice-card, .group-card, .list-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-2xl); box-shadow: var(--shadow-xs); }
-  .stats-card { display: grid; gap: var(--space-3); padding: var(--space-5); }
-  .stats-card div { border-radius: var(--radius-xl); background: var(--color-surface-soft); padding: var(--space-5); }
-  .stats-card span { display: block; font-size: 2.5rem; font-weight: 900; letter-spacing: -0.06em; }
-  .stats-card p { margin: var(--space-1) 0 0; color: var(--color-text-muted); font-weight: 750; }
+  .notice-card, .group-card, .list-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-2xl); box-shadow: var(--shadow-xs); }
   .notice-card { align-items: center; display: grid; gap: var(--space-4); margin-bottom: var(--space-12); padding: var(--space-5); }
   .notice-card h2 { font-size: 1.25rem; letter-spacing: -0.02em; }
   .notice-card p { margin-bottom: 0; }
@@ -216,6 +197,6 @@ const featuredTeams = [...new Set(groupMatches.flatMap((match) => [match.team1, 
   .team-cloud { display: flex; flex-wrap: wrap; margin-top: var(--space-4); }
   .team-pill { background: var(--color-surface-soft); border: 1px solid var(--color-border); border-radius: var(--radius-full); color: var(--color-text-muted); font-size: 0.9rem; font-weight: 750; padding: 0.35rem 0.7rem; }
   .split-block { display: grid; gap: var(--space-6); }
-  @media (min-width: 720px) { .hero-shell, .notice-card, .split-block { grid-template-columns: minmax(0, 1.3fr) minmax(18rem, 0.7fr); align-items: center; } .stats-card, .details-grid { grid-template-columns: 1fr; } .match-grid, .groups-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 720px) { .notice-card, .split-block { grid-template-columns: minmax(0, 1.3fr) minmax(18rem, 0.7fr); align-items: center; } .details-grid { grid-template-columns: 1fr; } .match-grid, .groups-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (min-width: 1080px) { .match-grid, .groups-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 </style>

@@ -6,7 +6,7 @@ import { getWorldCupSummary } from '../../data/worldcup2026';
 import { getCountryName } from '../../i18n/countries';
 import { useTranslations } from '../../i18n/ui';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { findMatchBySlug, getMatchSlug } from '../../utils/matches';
+import { getMatchSlug } from '../../utils/matches';
 
 export async function getStaticPaths() {
   const summary = await getWorldCupSummary();

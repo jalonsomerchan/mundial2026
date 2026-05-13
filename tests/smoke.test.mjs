@@ -157,6 +157,9 @@ describe('project smoke checks', () => {
       assert.ok(translations['team.calendarTitle'], `${locale}.json should include team.calendarTitle`);
       assert.ok(translations['simulator.title'], `${locale}.json should include simulator.title`);
       assert.ok(translations['simulator.randomize'], `${locale}.json should include simulator.randomize`);
+      assert.ok(translations['simulator.share'], `${locale}.json should include simulator.share`);
+      assert.ok(translations['simulator.clearPrediction'], `${locale}.json should include simulator.clearPrediction`);
+      assert.ok(translations['simulator.shareCopied'], `${locale}.json should include simulator.shareCopied`);
       assert.ok(translations['routes.calendar'], `${locale}.json should include routes.calendar`);
       assert.ok(translations['routes.groups'], `${locale}.json should include routes.groups`);
       assert.ok(translations['routes.teams'], `${locale}.json should include routes.teams`);
@@ -279,13 +282,25 @@ describe('project smoke checks', () => {
     assert.match(simulator, /resolveToken/);
     assert.match(simulator, /data-pick/);
     assert.match(randomizer, /data-randomize-simulator/);
+    assert.match(randomizer, /data-share-simulator/);
+    assert.match(randomizer, /data-clear-simulator/);
+    assert.match(randomizer, /predictionQueryKey/);
+    assert.match(randomizer, /encodePrediction/);
+    assert.match(randomizer, /decodePrediction/);
+    assert.match(randomizer, /navigator\.share/);
+    assert.match(randomizer, /navigator\.clipboard/);
+    assert.match(randomizer, /localStorage\.removeItem/);
     assert.match(randomizer, /getAvailableMatches/);
     assert.match(randomizer, /Math\.random/);
     assert.match(spanishPage, /SimulatorRandomizer/);
-    assert.match(spanishPage, /WorldCupSimulator/);
+    assert.match(spanishPage, /shareLabel/);
+    assert.match(spanishPage, /clearLabel/);
     assert.match(englishPage, /SimulatorRandomizer/);
-    assert.match(englishPage, /WorldCupSimulator/);
+    assert.match(englishPage, /shareLabel/);
+    assert.match(englishPage, /clearLabel/);
     assert.match(simulatorStyles, /random-button/);
+    assert.match(simulatorStyles, /share-button/);
+    assert.match(simulatorStyles, /clear-button/);
     assert.match(header, /nav\.simulator/);
   });
 

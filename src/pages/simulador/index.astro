@@ -1,5 +1,6 @@
 ---
 import Container from '../../components/Container.astro';
+import SimulatorRandomizer from '../../components/SimulatorRandomizer.astro';
 import WorldCupSimulator from '../../components/WorldCupSimulator.astro';
 import { defaultLocale } from '../../config/site';
 import { getWorldCupSummary } from '../../data/worldcup2026';
@@ -14,6 +15,7 @@ const summary = await getWorldCupSummary();
 
 <BaseLayout title={t('simulator.metaTitle')} description={t('simulator.metaDescription')} locale={locale}>
   <Container>
+    <SimulatorRandomizer label={t('simulator.randomize')} />
     <WorldCupSimulator locale={locale} summary={summary} />
   </Container>
 </BaseLayout>

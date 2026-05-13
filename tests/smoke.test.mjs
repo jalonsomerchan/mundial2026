@@ -181,7 +181,7 @@ describe('project smoke checks', () => {
     const globalStyles = readText('src/styles/global.css');
 
     assert.match(globalStyles, /h1\s*\{/);
-    assert.match(globalStyles, /font-weight:\s*400/);
+    assert.match(globalStyles, /font-weight:\s*400\s*!important/);
   });
 
   it('keeps the World Cup data source and homepage wired', () => {
@@ -335,6 +335,8 @@ describe('project smoke checks', () => {
     assert.match(knockoutPatch, /MutationObserver/);
     assert.match(knockoutPatch, /resolveTeam/);
     assert.match(knockoutPatch, /getWinner/);
+    assert.match(knockoutPatch, /patchChampion/);
+    assert.match(knockoutPatch, /data-simulator-champion/);
     assert.match(knockoutPatch, /data-pick/);
     assert.match(knockoutPatch, /localStorage/);
     assert.match(randomizer, /data-randomize-simulator/);

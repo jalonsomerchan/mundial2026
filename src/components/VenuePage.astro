@@ -1,0 +1,95 @@
+---
+import CalendarMatchRow from './CalendarMatchRow.astro';
+import LocalMatchTimeScript from './LocalMatchTimeScript.astro';
+import type { Locale } from '../config/site';
+import type { VenueSummary } from '../utils/venues';
+import { useTranslations } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+  venue: VenueSummary;
+}
+
+const { locale, venue } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<article class="venue-page">
+  <header class="venue-hero">
+    <p class="eyebrow">{t('venue.eyebrow')}</p>
+    <h1>{venue.name}</h1>
+    <p>{t('venue.description')}</p>
+  </header>
+
+  <section class="venue-section" aria-labelledby="venue-matches-title">
+    <div class="section-heading">
+      <p class="eyebrow">{t('venue.matchesEyebrow')}</p>
+      <h2 id="venue-matches-title">{t('venue.matchesTitle')}</h2>
+    </div>
+    <div class="venue-matches">
+      {venue.matches.map((match) => <CalendarMatchRow locale={locale} match={match} />)}
+    </div>
+  </section>
+</article>
+
+<LocalMatchTimeScript />
+
+<style>
+  .venue-page {
+    padding: var(--space-16) 0;
+  }
+
+  .venue-hero {
+    max-width: 52rem;
+    margin-bottom: var(--space-8);
+  }
+
+  .eyebrow {
+    color: var(--color-primary);
+    font-size: 0.78rem;
+    font-weight: 850;
+    letter-spacing: 0.16em;
+    margin: 0 0 var(--space-3);
+    text-transform: uppercase;
+  }
+
+  h1,
+  h2,
+  p {
+    margin-top: 0;
+  }
+
+  h1 {
+    font-size: clamp(2.35rem, 11vw, 4.8rem);
+    font-weight: 950;
+    letter-spacing: -0.075em;
+    line-height: 0.95;
+    margin-bottom: var(--space-4);
+  }
+
+  .venue-hero p:not(.eyebrow) {
+    color: var(--color-text-muted);
+    font-size: 1.05rem;
+    line-height: 1.75;
+  }
+
+  .venue-section {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-xs);
+    padding: var(--space-5);
+  }
+
+  .section-heading h2 {
+    font-size: clamp(1.65rem, 7vw, 2.6rem);
+    font-weight: 950;
+    letter-spacing: -0.06em;
+    margin-bottom: var(--space-5);
+  }
+
+  .venue-matches {
+    display: grid;
+    gap: var(--space-3);
+  }
+</style>

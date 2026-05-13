@@ -1,0 +1,28 @@
+---
+import Container from '../../components/Container.astro';
+import VenuePage from '../../components/VenuePage.astro';
+import { defaultLocale } from '../../config/site';
+import { getWorldCupSummary } from '../../data/worldcup2026';
+import { useTranslations } from '../../i18n/ui';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getVenueSlug, getVenuesFromMatches } from '../../utils/venues';
+
+export async function getStaticPaths() {
+  const summary = await getWorldCupSummary();
+
+  return getVenuesFromMatches(summary.matches).map((venue) => ({
+    params: { venue: getVenueSlug(venue.name) },
+    props: { venue },
+  }));
+}
+
+const { venue } = Astro.props;
+const locale = defaultLocale;
+const t = useTranslations(locale);
+---
+
+<BaseLayout title={`${venue.name} | Mundial 2026`} description={t('venue.metaDescription')} locale={locale}>
+  <Container>
+    <VenuePage locale={locale} venue={venue} />
+  </Container>
+</BaseLayout>

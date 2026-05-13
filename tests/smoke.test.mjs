@@ -64,6 +64,7 @@ describe('project smoke checks', () => {
       'src/i18n/ui.ts',
       'src/i18n/translations',
       'src/styles/global.css',
+      'src/styles/simulator-dynamic.css',
       'src/utils/calendar.ts',
       'src/utils/groups.ts',
       'src/utils/matches.ts',
@@ -92,7 +93,7 @@ describe('project smoke checks', () => {
   });
 
   it('keeps basic template components available', () => {
-    ['Button', 'CalendarMatchRow', 'Container', 'Footer', 'GroupPage', 'GroupStandingsTable', 'Header', 'LocalMatchTimeScript', 'MatchCalendar', 'MatchCard', 'TeamLink', 'TeamPage', 'WorldCupExplorer', 'WorldCupSimulator'].forEach((component) => {
+    ['Button', 'CalendarMatchRow', 'Container', 'Footer', 'GroupPage', 'GroupStandingsTable', 'Header', 'LocalMatchTimeScript', 'MatchCalendar', 'MatchCard', 'SimulatorRandomizer', 'TeamLink', 'TeamPage', 'WorldCupExplorer', 'WorldCupSimulator'].forEach((component) => {
       assert.equal(
         existsSync(join(root, `src/components/${component}.astro`)),
         true,
@@ -155,6 +156,7 @@ describe('project smoke checks', () => {
       assert.ok(translations['group.standingsTitle'], `${locale}.json should include group.standingsTitle`);
       assert.ok(translations['team.calendarTitle'], `${locale}.json should include team.calendarTitle`);
       assert.ok(translations['simulator.title'], `${locale}.json should include simulator.title`);
+      assert.ok(translations['simulator.randomize'], `${locale}.json should include simulator.randomize`);
       assert.ok(translations['routes.calendar'], `${locale}.json should include routes.calendar`);
       assert.ok(translations['routes.groups'], `${locale}.json should include routes.groups`);
       assert.ok(translations['routes.teams'], `${locale}.json should include routes.teams`);
@@ -265,8 +267,10 @@ describe('project smoke checks', () => {
 
   it('keeps the simulator page wired', () => {
     const simulator = readText('src/components/WorldCupSimulator.astro');
+    const randomizer = readText('src/components/SimulatorRandomizer.astro');
     const spanishPage = readText('src/pages/simulador/index.astro');
     const englishPage = readText('src/pages/en/simulator/index.astro');
+    const simulatorStyles = readText('src/styles/simulator-dynamic.css');
     const header = readText('src/components/Header.astro');
 
     assert.match(simulator, /worldcup-simulator-data/);
@@ -274,8 +278,14 @@ describe('project smoke checks', () => {
     assert.match(simulator, /getGroupStandings/);
     assert.match(simulator, /resolveToken/);
     assert.match(simulator, /data-pick/);
+    assert.match(randomizer, /data-randomize-simulator/);
+    assert.match(randomizer, /getAvailableMatches/);
+    assert.match(randomizer, /Math\.random/);
+    assert.match(spanishPage, /SimulatorRandomizer/);
     assert.match(spanishPage, /WorldCupSimulator/);
+    assert.match(englishPage, /SimulatorRandomizer/);
     assert.match(englishPage, /WorldCupSimulator/);
+    assert.match(simulatorStyles, /random-button/);
     assert.match(header, /nav\.simulator/);
   });
 

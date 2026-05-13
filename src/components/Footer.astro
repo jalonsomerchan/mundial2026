@@ -1,5 +1,6 @@
 ---
 import Container from './Container.astro';
+import { footerGames, footerTools } from '../data/alonsoftwareProjects';
 import { siteConfig, type Locale } from '../config/site';
 import { useTranslations } from '../i18n/ui';
 
@@ -9,10 +10,165 @@ interface Props {
 
 const { locale } = Astro.props;
 const t = useTranslations(locale);
+const projectGroups = [
+  { title: t('footer.tools'), projects: footerTools },
+  { title: t('footer.games'), projects: footerGames },
+];
+
+function formatProjectLabel(project: string) {
+  return t('footer.openProject').replaceAll('{project}', project);
+}
 ---
 
-<footer class="border-t border-[var(--color-border)]">
-  <Container class="py-6 text-sm text-[var(--color-muted)]">
-    <p>© {new Date().getFullYear()} {siteConfig.name}. {t('footer.createdWith')}</p>
+<footer class="site-footer">
+  <Container class="site-footer__inner">
+    <div class="site-footer__brand">
+      <p class="eyebrow">{t('footer.eyebrow')}</p>
+      <h2>{t('footer.title')}</h2>
+      <p>{t('footer.copy')}</p>
+      <strong>{siteConfig.name}</strong>
+    </div>
+
+    <div class="site-footer__projects" aria-label={t('footer.title')}>
+      {projectGroups.map((group) => (
+        <section class="site-footer__group" aria-labelledby={`footer-${group.title.toLowerCase().replaceAll(' ', '-')}`}>
+          <h3 id={`footer-${group.title.toLowerCase().replaceAll(' ', '-')}`}>{group.title}</h3>
+          <ul>
+            {group.projects.map((project) => (
+              <li>
+                <a href={project.href} target="_blank" rel="noopener noreferrer" aria-label={formatProjectLabel(project.name)}>
+                  <span>{project.name}</span>
+                  <small>{new URL(project.href).hostname}</small>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
   </Container>
 </footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--color-border);
+    margin-top: var(--space-12);
+    padding: var(--space-10) 0;
+  }
+
+  .site-footer__inner {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  .site-footer__brand {
+    max-width: 32rem;
+  }
+
+  .eyebrow {
+    color: var(--color-primary);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    margin: 0 0 var(--space-3);
+    text-transform: uppercase;
+  }
+
+  h2,
+  h3,
+  p {
+    margin-top: 0;
+  }
+
+  h2 {
+    font-size: clamp(1.75rem, 7vw, 2.8rem);
+    font-weight: 400;
+    letter-spacing: -0.055em;
+    line-height: 1;
+    margin-bottom: var(--space-4);
+  }
+
+  h3 {
+    color: var(--color-text);
+    font-size: 0.95rem;
+    font-weight: 850;
+    letter-spacing: 0.08em;
+    margin-bottom: var(--space-3);
+    text-transform: uppercase;
+  }
+
+  .site-footer__brand p:not(.eyebrow) {
+    color: var(--color-text-muted);
+    line-height: 1.75;
+    margin-bottom: var(--space-4);
+  }
+
+  .site-footer__brand strong {
+    color: var(--color-text);
+    font-weight: 850;
+  }
+
+  .site-footer__projects {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .site-footer__group {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-xs);
+    padding: var(--space-5);
+  }
+
+  ul {
+    display: grid;
+    gap: var(--space-2);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  a {
+    align-items: center;
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    color: var(--color-text);
+    display: grid;
+    gap: 0.15rem;
+    padding: 0.75rem 0.85rem;
+    text-decoration: none;
+    transition:
+      border-color var(--transition-base),
+      color var(--transition-base),
+      transform var(--transition-fast);
+  }
+
+  a:hover {
+    border-color: color-mix(in srgb, var(--color-primary), transparent 55%);
+    color: var(--color-primary);
+    transform: translateY(-1px);
+  }
+
+  a span {
+    font-weight: 800;
+  }
+
+  a small {
+    color: var(--color-text-soft);
+    font-size: 0.8rem;
+    overflow-wrap: anywhere;
+  }
+
+  @media (min-width: 760px) {
+    .site-footer__inner {
+      align-items: start;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    }
+
+    .site-footer__projects {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

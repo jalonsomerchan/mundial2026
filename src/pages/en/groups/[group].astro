@@ -1,0 +1,27 @@
+---
+import Container from '../../../components/Container.astro';
+import GroupPage from '../../../components/GroupPage.astro';
+import { getWorldCupSummary } from '../../../data/worldcup2026';
+import { useTranslations } from '../../../i18n/ui';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getGroupSlug } from '../../../utils/groups';
+
+export async function getStaticPaths() {
+  const summary = await getWorldCupSummary();
+
+  return summary.groups.map((group) => ({
+    params: { group: getGroupSlug(group.name) },
+    props: { group },
+  }));
+}
+
+const { group } = Astro.props;
+const locale = 'en';
+const t = useTranslations(locale);
+---
+
+<BaseLayout title={`${t('group.titlePrefix')} ${group.name} | World Cup 2026`} description={t('group.metaDescription')} locale={locale}>
+  <Container>
+    <GroupPage locale={locale} group={group} />
+  </Container>
+</BaseLayout>

@@ -1,0 +1,252 @@
+---
+import TeamLink from './TeamLink.astro';
+import VenueLink from './VenueLink.astro';
+import LocalMatchTimeScript from './LocalMatchTimeScript.astro';
+import type { Locale } from '../config/site';
+import type { WorldCupMatch } from '../data/worldcup2026';
+import { getCountryName } from '../i18n/countries';
+import { getLocalizedRoutePath, useTranslations } from '../i18n/ui';
+import { getGroupPath } from '../utils/groups';
+import { getMatchResult, getMatchUtcIso } from '../utils/matches';
+
+interface Props {
+  locale: Locale;
+  match: WorldCupMatch;
+}
+
+const { locale, match } = Astro.props;
+const t = useTranslations(locale);
+const matchIso = getMatchUtcIso(match);
+const result = getMatchResult(match);
+const team1Label = getCountryName(match.team1, locale);
+const team2Label = getCountryName(match.team2, locale);
+const scoreParts = result === '-' ? ['-', '-'] : result.split(' - ');
+const groupUrl = match.group ? getGroupPath(match.group, locale) : null;
+const calendarUrl = getLocalizedRoutePath('routes.calendar', locale);
+---
+
+<article class="match-detail">
+  <header class="match-hero">
+    <p class="eyebrow">{match.group ?? match.round}</p>
+    <h1>{team1Label} {t('home.versus')} {team2Label}</h1>
+    <div class="match-quick-links" aria-label={t('match.quickLinks')}>
+      <a href={calendarUrl}>{t('match.calendarLink')}</a>
+      {groupUrl && <a href={groupUrl}>{match.group}</a>}
+      <VenueLink locale={locale} venue={match.ground} />
+    </div>
+  </header>
+
+  <section class="score-card" aria-label={`${team1Label} ${result} ${team2Label}`}>
+    <div class="score-team">
+      <TeamLink locale={locale} team={match.team1} flagSize={46} />
+      <strong>{scoreParts[0]}</strong>
+    </div>
+    <span class="score-separator">{t('home.versus')}</span>
+    <div class="score-team score-team-away">
+      <TeamLink locale={locale} team={match.team2} flagSize={46} />
+      <strong>{scoreParts[1]}</strong>
+    </div>
+  </section>
+
+  <section class="match-info" aria-labelledby="match-info-title">
+    <div class="section-heading">
+      <p class="eyebrow">{t('match.detailsEyebrow')}</p>
+      <h2 id="match-info-title">{t('match.detailsTitle')}</h2>
+    </div>
+
+    <dl class="info-grid">
+      <div>
+        <dt>{t('home.round')}</dt>
+        <dd>{match.round}</dd>
+      </div>
+      <div>
+        <dt>{t('home.result')}</dt>
+        <dd>{result}</dd>
+      </div>
+      <div>
+        <dt>{t('home.localTime')}</dt>
+        <dd><time class="js-local-time" datetime={matchIso}>{match.time}</time></dd>
+      </div>
+      <div>
+        <dt>{t('calendar.dayLabel')}</dt>
+        <dd><time class="js-local-date" datetime={matchIso}>{match.date}</time></dd>
+      </div>
+      {match.group && (
+        <div>
+          <dt>{t('match.group')}</dt>
+          <dd><a href={getGroupPath(match.group, locale)}>{match.group}</a></dd>
+        </div>
+      )}
+      <div>
+        <dt>{t('home.venue')}</dt>
+        <dd><VenueLink locale={locale} venue={match.ground} /></dd>
+      </div>
+    </dl>
+  </section>
+</article>
+
+<LocalMatchTimeScript />
+
+<style>
+  .match-detail {
+    padding: var(--space-16) 0;
+  }
+
+  .match-hero {
+    margin-bottom: var(--space-6);
+    max-width: 58rem;
+  }
+
+  .eyebrow {
+    color: var(--color-primary);
+    font-size: 0.78rem;
+    font-weight: 850;
+    letter-spacing: 0.16em;
+    margin: 0 0 var(--space-3);
+    text-transform: uppercase;
+  }
+
+  h1,
+  h2,
+  p {
+    margin-top: 0;
+  }
+
+  h1 {
+    font-size: clamp(2.35rem, 11vw, 5.2rem);
+    font-weight: 950;
+    letter-spacing: -0.08em;
+    line-height: 0.95;
+    margin-bottom: var(--space-5);
+  }
+
+  .match-quick-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .match-quick-links a {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    color: var(--color-text-muted);
+    font-weight: 800;
+    padding: 0.55rem 0.85rem;
+    text-decoration: none;
+  }
+
+  .match-quick-links a:hover {
+    color: var(--color-primary);
+  }
+
+  .score-card,
+  .match-info {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .score-card {
+    display: grid;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+    padding: var(--space-5);
+  }
+
+  .score-team {
+    align-items: center;
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: var(--space-4);
+  }
+
+  .score-team strong {
+    align-items: center;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    display: inline-flex;
+    font-size: 2rem;
+    font-weight: 950;
+    justify-content: center;
+    min-height: 3.4rem;
+    min-width: 3.8rem;
+  }
+
+  .score-team-away {
+    text-align: left;
+  }
+
+  .score-separator {
+    color: var(--color-text-soft);
+    font-size: 0.75rem;
+    font-weight: 950;
+    justify-self: center;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .match-info {
+    padding: var(--space-5);
+  }
+
+  .section-heading h2 {
+    font-size: clamp(1.6rem, 7vw, 2.5rem);
+    font-weight: 950;
+    letter-spacing: -0.06em;
+    margin-bottom: var(--space-5);
+  }
+
+  .info-grid {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+  }
+
+  .info-grid div {
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+  }
+
+  dt {
+    color: var(--color-text-soft);
+    font-size: 0.72rem;
+    font-weight: 850;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  dd {
+    color: var(--color-text-muted);
+    font-weight: 800;
+    margin: var(--space-1) 0 0;
+  }
+
+  dd a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  dd a:hover {
+    color: var(--color-primary);
+  }
+
+  @media (min-width: 720px) {
+    .score-card {
+      align-items: center;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    }
+
+    .info-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

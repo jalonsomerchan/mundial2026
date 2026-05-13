@@ -11,6 +11,7 @@ const { locale } = Astro.props;
 const t = useTranslations(locale);
 const homeUrl = getLocalizedPath('/', locale);
 const calendarUrl = getLocalizedRoutePath('routes.calendar', locale);
+const simulatorUrl = getLocalizedRoutePath('routes.simulator', locale);
 const alternateLocales = getAlternateLocales(locale);
 ---
 
@@ -20,6 +21,7 @@ const alternateLocales = getAlternateLocales(locale);
     <nav aria-label="Navegación principal" class="flex items-center gap-3 text-sm text-[var(--color-text-muted)]">
       <a class="font-semibold hover:text-[var(--color-text)]" href={homeUrl}>{t('nav.home')}</a>
       <a class="font-semibold hover:text-[var(--color-text)]" href={calendarUrl}>{t('nav.calendar')}</a>
+      <a class="font-semibold hover:text-[var(--color-text)]" href={simulatorUrl}>{t('nav.simulator')}</a>
       {alternateLocales.map((alternateLocale) => (
         <a
           class="rounded-full border border-[var(--color-border)] px-3 py-1 text-xs font-bold hover:text-[var(--color-text)]"

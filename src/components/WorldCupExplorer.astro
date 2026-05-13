@@ -1,0 +1,431 @@
+---
+import type { Locale } from '../config/site';
+import type { WorldCupSummary } from '../data/worldcup2026';
+import { useTranslations } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+  summary: WorldCupSummary;
+}
+
+const { locale, summary } = Astro.props;
+const t = useTranslations(locale);
+const groupMatches = summary.matches.filter((match) => match.group);
+const knockoutMatches = summary.matches.filter((match) => !match.group);
+const highlightedMatches = summary.matches.slice(0, 8);
+const featuredTeams = [...new Set(groupMatches.flatMap((match) => [match.team1, match.team2]))].sort((a, b) =>
+  a.localeCompare(b)
+);
+const dateFormatter = new Intl.DateTimeFormat(locale, {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+});
+
+function formatDate(date: string) {
+  return dateFormatter.format(new Date(`${date}T12:00:00Z`));
+}
+---
+
+<section class="hero-shell">
+  <div class="hero-copy">
+    <p class="eyebrow">{t('home.eyebrow')}</p>
+    <h1>{t('home.title')}</h1>
+    <p>{t('home.description')}</p>
+    <div class="hero-actions" aria-label={t('home.primaryActions')}>
+      <a class="btn btn-primary" href="#matches">{t('home.viewMatches')}</a>
+      <a class="btn btn-secondary" href="#teams">{t('home.viewTeams')}</a>
+    </div>
+  </div>
+
+  <aside class="stats-card" aria-label={t('home.summaryTitle')}>
+    <div>
+      <span>{summary.matches.length}</span>
+      <p>{t('home.statMatches')}</p>
+    </div>
+    <div>
+      <span>{summary.groups.length}</span>
+      <p>{t('home.statGroups')}</p>
+    </div>
+    <div>
+      <span>{summary.venues.length}</span>
+      <p>{t('home.statVenues')}</p>
+    </div>
+  </aside>
+</section>
+
+<section class="notice-card" aria-labelledby="data-source-title">
+  <div>
+    <h2 id="data-source-title">{t('home.dataTitle')}</h2>
+    <p>{t('home.dataDescription')}</p>
+  </div>
+  <a href={summary.sourceUrl} rel="noreferrer" target="_blank">{t('home.dataSource')}</a>
+</section>
+
+<section id="matches" class="section-block" aria-labelledby="matches-title">
+  <div class="section-heading">
+    <p class="eyebrow">{t('home.matchesEyebrow')}</p>
+    <h2 id="matches-title">{t('home.matchesTitle')}</h2>
+    <p>{t('home.matchesDescription')}</p>
+  </div>
+
+  <div class="match-grid">
+    {highlightedMatches.map((match) => (
+      <article class="match-card">
+        <div class="match-meta">
+          <span>{match.group ?? match.round}</span>
+          <time datetime={match.date}>{formatDate(match.date)}</time>
+        </div>
+        <h3>{match.team1} <span>{t('home.versus')}</span> {match.team2}</h3>
+        <dl>
+          <div>
+            <dt>{t('home.round')}</dt>
+            <dd>{match.round}</dd>
+          </div>
+          <div>
+            <dt>{t('home.time')}</dt>
+            <dd>{match.time}</dd>
+          </div>
+          <div>
+            <dt>{t('home.venue')}</dt>
+            <dd>{match.ground}</dd>
+          </div>
+        </dl>
+      </article>
+    ))}
+  </div>
+</section>
+
+<section id="teams" class="section-block" aria-labelledby="teams-title">
+  <div class="section-heading">
+    <p class="eyebrow">{t('home.teamsEyebrow')}</p>
+    <h2 id="teams-title">{t('home.teamsTitle')}</h2>
+    <p>{t('home.teamsDescription')}</p>
+  </div>
+
+  <div class="groups-grid">
+    {summary.groups.map((group) => (
+      <article class="group-card">
+        <div class="group-card-header">
+          <h3>{group.name}</h3>
+          <span>{group.matches.length} {t('home.groupMatches')}</span>
+        </div>
+        <ul aria-label={`${t('home.teamsInGroup')} ${group.name}`}>
+          {group.teams.map((team) => <li>{team}</li>)}
+        </ul>
+      </article>
+    ))}
+  </div>
+</section>
+
+<section class="section-block split-block" aria-labelledby="details-title">
+  <div class="section-heading compact-heading">
+    <p class="eyebrow">{t('home.detailsEyebrow')}</p>
+    <h2 id="details-title">{t('home.detailsTitle')}</h2>
+    <p>{t('home.detailsDescription')}</p>
+  </div>
+
+  <div class="details-grid">
+    <article class="list-card">
+      <h3>{t('home.knockoutTitle')}</h3>
+      <p>{knockoutMatches.length} {t('home.knockoutDescription')}</p>
+    </article>
+    <article class="list-card">
+      <h3>{t('home.teamsListTitle')}</h3>
+      <p>{featuredTeams.slice(0, 18).join(', ')}</p>
+    </article>
+  </div>
+</section>
+
+<style>
+  .hero-shell {
+    display: grid;
+    gap: var(--space-8);
+    padding: var(--space-16) 0 var(--space-10);
+  }
+
+  .hero-copy {
+    max-width: 48rem;
+  }
+
+  .eyebrow {
+    margin: 0 0 var(--space-3);
+    color: var(--color-primary);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  h1,
+  h2,
+  h3,
+  p {
+    margin-top: 0;
+  }
+
+  h1 {
+    margin-bottom: var(--space-5);
+    font-size: clamp(2.5rem, 12vw, 5.4rem);
+    font-weight: 900;
+    letter-spacing: -0.075em;
+    line-height: 0.92;
+  }
+
+  h2 {
+    margin-bottom: var(--space-4);
+    font-size: clamp(2rem, 8vw, 3.4rem);
+    font-weight: 900;
+    letter-spacing: -0.055em;
+    line-height: 1;
+  }
+
+  h3 {
+    color: var(--color-text);
+    font-size: 1.1rem;
+    font-weight: 850;
+    line-height: 1.2;
+  }
+
+  .hero-copy > p:not(.eyebrow),
+  .section-heading p,
+  .notice-card p,
+  .list-card p {
+    color: var(--color-text-muted);
+    font-size: 1.05rem;
+    line-height: 1.75;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-8);
+  }
+
+  .btn {
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
+    display: inline-flex;
+    font-weight: 800;
+    justify-content: center;
+    min-height: 2.9rem;
+    padding: 0.85rem 1.1rem;
+    text-decoration: none;
+    transition:
+      transform var(--transition-fast),
+      background-color var(--transition-base),
+      border-color var(--transition-base),
+      color var(--transition-base),
+      box-shadow var(--transition-base);
+  }
+
+  .btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .btn-primary {
+    background: var(--color-primary);
+    box-shadow: var(--shadow-sm);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: var(--color-primary-hover);
+  }
+
+  .btn-secondary {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+    color: var(--color-text);
+  }
+
+  .stats-card,
+  .notice-card,
+  .match-card,
+  .group-card,
+  .list-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .stats-card {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-5);
+  }
+
+  .stats-card div {
+    border-radius: var(--radius-xl);
+    background: var(--color-surface-soft);
+    padding: var(--space-5);
+  }
+
+  .stats-card span {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 900;
+    letter-spacing: -0.06em;
+  }
+
+  .stats-card p {
+    margin: var(--space-1) 0 0;
+    color: var(--color-text-muted);
+    font-weight: 750;
+  }
+
+  .notice-card {
+    align-items: center;
+    display: grid;
+    gap: var(--space-4);
+    margin-bottom: var(--space-12);
+    padding: var(--space-5);
+  }
+
+  .notice-card h2 {
+    font-size: 1.25rem;
+    letter-spacing: -0.02em;
+  }
+
+  .notice-card p {
+    margin-bottom: 0;
+  }
+
+  .notice-card a {
+    color: var(--color-primary);
+    font-weight: 850;
+  }
+
+  .section-block {
+    padding: var(--space-10) 0;
+  }
+
+  .section-heading {
+    max-width: 46rem;
+    margin-bottom: var(--space-8);
+  }
+
+  .compact-heading {
+    margin-bottom: 0;
+  }
+
+  .match-grid,
+  .groups-grid,
+  .details-grid {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .match-card,
+  .group-card,
+  .list-card {
+    padding: var(--space-5);
+  }
+
+  .match-card {
+    transition:
+      transform var(--transition-base),
+      border-color var(--transition-base),
+      box-shadow var(--transition-base);
+  }
+
+  .match-card:hover {
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-2px);
+  }
+
+  .match-meta,
+  .group-card-header {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    justify-content: space-between;
+    margin-bottom: var(--space-4);
+  }
+
+  .match-meta span,
+  .match-meta time,
+  .group-card-header span {
+    background: var(--color-primary-soft);
+    border-radius: var(--radius-full);
+    color: var(--color-primary);
+    font-size: 0.8rem;
+    font-weight: 850;
+    padding: 0.35rem 0.7rem;
+  }
+
+  .match-card h3 span {
+    color: var(--color-text-soft);
+    font-size: 0.82em;
+  }
+
+  dl {
+    display: grid;
+    gap: var(--space-3);
+    margin: var(--space-5) 0 0;
+  }
+
+  dt {
+    color: var(--color-text-soft);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  dd {
+    margin: var(--space-1) 0 0;
+    color: var(--color-text-muted);
+    font-weight: 650;
+  }
+
+  .group-card ul {
+    display: grid;
+    gap: var(--space-2);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .group-card li {
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-weight: 750;
+    padding-top: var(--space-2);
+  }
+
+  .split-block {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 720px) {
+    .hero-shell,
+    .notice-card,
+    .split-block {
+      grid-template-columns: minmax(0, 1.3fr) minmax(18rem, 0.7fr);
+      align-items: center;
+    }
+
+    .stats-card,
+    .details-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .match-grid,
+    .groups-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1080px) {
+    .match-grid,
+    .groups-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

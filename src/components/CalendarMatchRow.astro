@@ -1,10 +1,11 @@
 ---
 import TeamLink from './TeamLink.astro';
+import VenueLink from './VenueLink.astro';
 import type { Locale } from '../config/site';
 import type { WorldCupMatch } from '../data/worldcup2026';
 import { getCountryName } from '../i18n/countries';
 import { useTranslations } from '../i18n/ui';
-import { getMatchResult, getMatchUtcIso } from '../utils/matches';
+import { getMatchPath, getMatchResult, getMatchUtcIso } from '../utils/matches';
 
 interface Props {
   locale: Locale;
@@ -15,6 +16,7 @@ const { locale, match } = Astro.props;
 const t = useTranslations(locale);
 const matchIso = getMatchUtcIso(match);
 const result = getMatchResult(match);
+const matchUrl = getMatchPath(match, locale);
 
 function getTeamLabel(team: string) {
   return getCountryName(team, locale);
@@ -35,7 +37,8 @@ function getTeamLabel(team: string) {
 
   <div class="match-meta">
     <span>{match.group ?? match.round}</span>
-    <span>{match.ground}</span>
+    <VenueLink locale={locale} venue={match.ground} />
+    <a class="match-detail-link" href={matchUrl}>{t('match.viewDetails')}</a>
   </div>
 </article>
 
@@ -58,7 +61,8 @@ function getTeamLabel(team: string) {
 
   .match-time time,
   .match-countdown,
-  .match-meta span {
+  .match-meta span,
+  .match-meta a {
     border-radius: var(--radius-full);
     display: inline-flex;
     font-size: 0.78rem;
@@ -117,9 +121,19 @@ function getTeamLabel(team: string) {
     gap: var(--space-2);
   }
 
-  .match-meta span {
+  .match-meta span,
+  .match-meta a {
     background: var(--color-surface-soft);
     color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .match-meta a:hover {
+    color: var(--color-primary);
+  }
+
+  .match-detail-link {
+    border: 1px solid var(--color-border);
   }
 
   @media (max-width: 520px) {

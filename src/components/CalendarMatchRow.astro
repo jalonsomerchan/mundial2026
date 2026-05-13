@@ -1,0 +1,175 @@
+---
+import type { Locale } from '../config/site';
+import type { WorldCupMatch } from '../data/worldcup2026';
+import { getCountryFlagUrl, getCountryName } from '../i18n/countries';
+import { useTranslations } from '../i18n/ui';
+import { getMatchResult, getMatchUtcIso } from '../utils/matches';
+
+interface Props {
+  locale: Locale;
+  match: WorldCupMatch;
+}
+
+const { locale, match } = Astro.props;
+const t = useTranslations(locale);
+const matchIso = getMatchUtcIso(match);
+const result = getMatchResult(match);
+
+function getTeamLabel(team: string) {
+  return getCountryName(team, locale);
+}
+
+function getTeamFlag(team: string) {
+  return getCountryFlagUrl(team);
+}
+---
+
+<article class="calendar-match-row">
+  <div class="match-time">
+    <time class="js-local-time" datetime={matchIso}>{match.time}</time>
+    <span class="match-countdown js-match-countdown" data-match-time={matchIso}>{t('home.countdownPending')}</span>
+  </div>
+
+  <div class="match-teams" aria-label={`${getTeamLabel(match.team1)} ${result} ${getTeamLabel(match.team2)}`}>
+    <span class="team-name">
+      {getTeamFlag(match.team1) && (
+        <img src={getTeamFlag(match.team1) ?? ''} width="24" height="24" alt="" loading="lazy" decoding="async" />
+      )}
+      <strong>{getTeamLabel(match.team1)}</strong>
+    </span>
+    <span class="score">{result}</span>
+    <span class="team-name team-name-away">
+      {getTeamFlag(match.team2) && (
+        <img src={getTeamFlag(match.team2) ?? ''} width="24" height="24" alt="" loading="lazy" decoding="async" />
+      )}
+      <strong>{getTeamLabel(match.team2)}</strong>
+    </span>
+  </div>
+
+  <div class="match-meta">
+    <span>{match.group ?? match.round}</span>
+    <span>{match.ground}</span>
+  </div>
+</article>
+
+<style>
+  .calendar-match-row {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    display: grid;
+    gap: var(--space-4);
+    padding: var(--space-4);
+  }
+
+  .match-time {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .match-time time,
+  .match-countdown,
+  .match-meta span {
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    font-size: 0.78rem;
+    font-weight: 850;
+    padding: 0.3rem 0.65rem;
+  }
+
+  .match-time time {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .match-countdown {
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+
+  .match-teams {
+    align-items: center;
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  .team-name {
+    align-items: center;
+    display: flex;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+
+  .team-name-away {
+    justify-content: flex-end;
+    text-align: right;
+  }
+
+  .team-name img {
+    border-radius: var(--radius-full);
+    flex: 0 0 auto;
+  }
+
+  .team-name strong {
+    color: var(--color-text);
+    display: block;
+    font-size: 0.98rem;
+    font-weight: 850;
+    line-height: 1.15;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .score {
+    align-items: center;
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    color: var(--color-text);
+    display: inline-flex;
+    font-weight: 950;
+    justify-content: center;
+    min-height: 2.25rem;
+    min-width: 3.5rem;
+    padding: 0 var(--space-2);
+  }
+
+  .match-meta {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .match-meta span {
+    background: var(--color-surface-soft);
+    color: var(--color-text-muted);
+  }
+
+  @media (max-width: 520px) {
+    .match-teams {
+      grid-template-columns: 1fr;
+    }
+
+    .team-name-away {
+      justify-content: flex-start;
+      text-align: left;
+    }
+
+    .score {
+      justify-self: start;
+    }
+  }
+
+  @media (min-width: 820px) {
+    .calendar-match-row {
+      align-items: center;
+      grid-template-columns: 9.5rem minmax(0, 1fr) minmax(12rem, 0.55fr);
+    }
+  }
+</style>

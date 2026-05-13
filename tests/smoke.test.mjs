@@ -139,6 +139,7 @@ describe('project smoke checks', () => {
       assert.ok(translations['home.title'], `${locale}.json should include home.title`);
       assert.ok(translations['home.result'], `${locale}.json should include home.result`);
       assert.ok(translations['home.localTime'], `${locale}.json should include home.localTime`);
+      assert.ok(translations['home.countdownPending'], `${locale}.json should include home.countdownPending`);
     });
   });
 
@@ -168,7 +169,7 @@ describe('project smoke checks', () => {
     assert.match(explorer, /getCountryFlagUrl/);
   });
 
-  it('keeps minimal match cards readable with local time and results', () => {
+  it('keeps match cards readable with countdowns, local time and results', () => {
     const dataHelper = readText('src/data/worldcup2026.ts');
     const matchCard = readText('src/components/MatchCard.astro');
     const matchUtils = readText('src/utils/matches.ts');
@@ -178,11 +179,15 @@ describe('project smoke checks', () => {
     assert.match(dataHelper, /score2\?: number/);
     assert.match(matchCard, /team-row/);
     assert.match(matchCard, /team-score/);
+    assert.match(matchCard, /match-countdown/);
+    assert.match(matchCard, /match-date-time/);
     assert.match(matchCard, /white-space:\s*nowrap/);
     assert.doesNotMatch(matchCard, /overflow-wrap:\s*anywhere/);
     assert.match(matchCard, /js-local-time/);
     assert.match(matchUtils, /return '-'/);
     assert.match(explorer, /Intl\.DateTimeFormat/);
+    assert.match(explorer, /Intl\.RelativeTimeFormat/);
+    assert.match(explorer, /js-match-countdown/);
   });
 
   it('keeps custom domain GitHub Pages settings', () => {

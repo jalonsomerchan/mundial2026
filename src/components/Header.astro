@@ -10,6 +10,7 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 const homeUrl = getLocalizedPath('/', locale);
+const calendarUrl = getLocalizedPath(t('routes.calendar'), locale);
 const alternateLocales = getAlternateLocales(locale);
 ---
 
@@ -18,10 +19,11 @@ const alternateLocales = getAlternateLocales(locale);
     <a class="font-black tracking-tight text-[var(--color-text)]" href={homeUrl}>{siteConfig.name}</a>
     <nav aria-label="Navegación principal" class="flex items-center gap-3 text-sm text-[var(--color-text-muted)]">
       <a class="font-semibold hover:text-[var(--color-text)]" href={homeUrl}>{t('nav.home')}</a>
+      <a class="font-semibold hover:text-[var(--color-text)]" href={calendarUrl}>{t('nav.calendar')}</a>
       {alternateLocales.map((alternateLocale) => (
         <a
           class="rounded-full border border-[var(--color-border)] px-3 py-1 text-xs font-bold hover:text-[var(--color-text)]"
-          href={getLocalizedPath('/', alternateLocale)}
+          href={getLocalizedPath(t('routes.calendar'), alternateLocale)}
           hreflang={alternateLocale}
         >
           {localeLabels[alternateLocale]}

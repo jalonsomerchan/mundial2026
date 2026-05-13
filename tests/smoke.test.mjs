@@ -56,6 +56,7 @@ describe('project smoke checks', () => {
       'src/i18n/ui.ts',
       'src/i18n/translations',
       'src/styles/global.css',
+      'src/utils/matches.ts',
     ].forEach((path) => {
       assert.equal(existsSync(join(root, path)), true, `${path} should exist`);
     });
@@ -80,7 +81,7 @@ describe('project smoke checks', () => {
   });
 
   it('keeps basic template components available', () => {
-    ['Button', 'Container', 'Footer', 'Header', 'WorldCupExplorer'].forEach((component) => {
+    ['Button', 'Container', 'Footer', 'Header', 'MatchCard', 'WorldCupExplorer'].forEach((component) => {
       assert.equal(
         existsSync(join(root, `src/components/${component}.astro`)),
         true,
@@ -136,6 +137,8 @@ describe('project smoke checks', () => {
         `${locale}.json keys should match ${defaultLocale}.json`
       );
       assert.ok(translations['home.title'], `${locale}.json should include home.title`);
+      assert.ok(translations['home.result'], `${locale}.json should include home.result`);
+      assert.ok(translations['home.localTime'], `${locale}.json should include home.localTime`);
     });
   });
 
@@ -163,6 +166,21 @@ describe('project smoke checks', () => {
     assert.match(countries, /names:\s*\{\s*es:/);
     assert.match(explorer, /getCountryName/);
     assert.match(explorer, /getCountryFlagUrl/);
+  });
+
+  it('keeps professional match cards with local time and results', () => {
+    const dataHelper = readText('src/data/worldcup2026.ts');
+    const matchCard = readText('src/components/MatchCard.astro');
+    const matchUtils = readText('src/utils/matches.ts');
+    const explorer = readText('src/components/WorldCupExplorer.astro');
+
+    assert.match(dataHelper, /score1\?: number/);
+    assert.match(dataHelper, /score2\?: number/);
+    assert.match(matchCard, /scoreboard/);
+    assert.match(matchCard, /getMatchResult/);
+    assert.match(matchCard, /js-local-time/);
+    assert.match(matchUtils, /return '-'/);
+    assert.match(explorer, /Intl\.DateTimeFormat/);
   });
 
   it('keeps custom domain GitHub Pages settings', () => {

@@ -5,6 +5,8 @@ export interface WorldCupMatch {
   time: string;
   team1: string;
   team2: string;
+  score1?: number;
+  score2?: number;
   group?: string;
   ground: string;
 }

@@ -1,0 +1,120 @@
+---
+import type { Locale } from '../config/site';
+import { getCountryFlagUrl, getCountryName } from '../i18n/countries';
+import { useTranslations } from '../i18n/ui';
+import type { TeamStanding } from '../utils/groups';
+
+interface Props {
+  locale: Locale;
+  standings: TeamStanding[];
+}
+
+const { locale, standings } = Astro.props;
+const t = useTranslations(locale);
+
+function getTeamLabel(team: string) {
+  return getCountryName(team, locale);
+}
+
+function getTeamFlag(team: string) {
+  return getCountryFlagUrl(team);
+}
+---
+
+<div class="standings-table-wrapper">
+  <table class="standings-table">
+    <caption>{t('group.standingsCaption')}</caption>
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">{t('group.team')}</th>
+        <th scope="col">{t('group.playedShort')}</th>
+        <th scope="col">{t('group.wonShort')}</th>
+        <th scope="col">{t('group.drawnShort')}</th>
+        <th scope="col">{t('group.lostShort')}</th>
+        <th scope="col">{t('group.goalDifferenceShort')}</th>
+        <th scope="col">{t('group.pointsShort')}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {standings.map((standing, index) => (
+        <tr>
+          <td>{index + 1}</td>
+          <th scope="row">
+            <span class="team-name">
+              {getTeamFlag(standing.team) && (
+                <img src={getTeamFlag(standing.team) ?? ''} width="24" height="24" alt="" loading="lazy" decoding="async" />
+              )}
+              {getTeamLabel(standing.team)}
+            </span>
+          </th>
+          <td>{standing.played}</td>
+          <td>{standing.won}</td>
+          <td>{standing.drawn}</td>
+          <td>{standing.lost}</td>
+          <td>{standing.goalDifference}</td>
+          <td><strong>{standing.points}</strong></td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .standings-table-wrapper {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    overflow-x: auto;
+  }
+
+  .standings-table {
+    border-collapse: collapse;
+    min-width: 38rem;
+    width: 100%;
+  }
+
+  caption {
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    width: 1px;
+  }
+
+  th,
+  td {
+    border-bottom: 1px solid var(--color-border);
+    padding: 0.8rem 0.75rem;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  thead th {
+    background: var(--color-surface-soft);
+    color: var(--color-text-soft);
+    font-size: 0.72rem;
+    font-weight: 850;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  tbody th {
+    color: var(--color-text);
+    text-align: left;
+  }
+
+  tbody tr:last-child th,
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .team-name {
+    align-items: center;
+    display: inline-flex;
+    gap: var(--space-2);
+  }
+
+  .team-name img {
+    border-radius: var(--radius-full);
+    flex: 0 0 auto;
+  }
+</style>

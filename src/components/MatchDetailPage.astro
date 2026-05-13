@@ -1,5 +1,5 @@
 ---
-import TeamLink from './TeamLink.astro';
+import MatchScoreboard from './MatchScoreboard.astro';
 import VenueLink from './VenueLink.astro';
 import LocalMatchTimeScript from './LocalMatchTimeScript.astro';
 import type { Locale } from '../config/site';
@@ -20,7 +20,6 @@ const matchIso = getMatchUtcIso(match);
 const result = getMatchResult(match);
 const team1Label = getCountryName(match.team1, locale);
 const team2Label = getCountryName(match.team2, locale);
-const scoreParts = result === '-' ? ['-', '-'] : result.split(' - ');
 const groupUrl = match.group ? getGroupPath(match.group, locale) : null;
 const calendarUrl = getLocalizedRoutePath('routes.calendar', locale);
 ---
@@ -36,17 +35,7 @@ const calendarUrl = getLocalizedRoutePath('routes.calendar', locale);
     </div>
   </header>
 
-  <section class="score-card" aria-label={`${team1Label} ${result} ${team2Label}`}>
-    <div class="score-team">
-      <TeamLink locale={locale} team={match.team1} flagSize={46} />
-      <strong>{scoreParts[0]}</strong>
-    </div>
-    <span class="score-separator">{t('home.versus')}</span>
-    <div class="score-team score-team-away">
-      <TeamLink locale={locale} team={match.team2} flagSize={46} />
-      <strong>{scoreParts[1]}</strong>
-    </div>
-  </section>
+  <MatchScoreboard locale={locale} match={match} />
 
   <section class="match-info" aria-labelledby="match-info-title">
     <div class="section-heading">
@@ -140,59 +129,11 @@ const calendarUrl = getLocalizedRoutePath('routes.calendar', locale);
     color: var(--color-primary);
   }
 
-  .score-card,
   .match-info {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-2xl);
     box-shadow: var(--shadow-xs);
-  }
-
-  .score-card {
-    display: grid;
-    gap: var(--space-3);
-    margin-bottom: var(--space-6);
-    padding: var(--space-5);
-  }
-
-  .score-team {
-    align-items: center;
-    background: var(--color-surface-soft);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    display: grid;
-    gap: var(--space-3);
-    grid-template-columns: minmax(0, 1fr) auto;
-    padding: var(--space-4);
-  }
-
-  .score-team strong {
-    align-items: center;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    display: inline-flex;
-    font-size: 2rem;
-    font-weight: 950;
-    justify-content: center;
-    min-height: 3.4rem;
-    min-width: 3.8rem;
-  }
-
-  .score-team-away {
-    text-align: left;
-  }
-
-  .score-separator {
-    color: var(--color-text-soft);
-    font-size: 0.75rem;
-    font-weight: 950;
-    justify-self: center;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-
-  .match-info {
     padding: var(--space-5);
   }
 
@@ -240,11 +181,6 @@ const calendarUrl = getLocalizedRoutePath('routes.calendar', locale);
   }
 
   @media (min-width: 720px) {
-    .score-card {
-      align-items: center;
-      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    }
-
     .info-grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }

@@ -90,6 +90,7 @@
   "simulator.realResult": "Real result",
   "simulator.pending": "Pending",
   "simulator.reset": "Reset simulation",
+  "simulator.randomize": "Generate randomly",
   "simulator.noChampion": "Pick winners through the final",
   "simulator.unresolvedTeam": "To be decided",
   "simulator.groupStage": "Group stage",

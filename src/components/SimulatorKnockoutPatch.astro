@@ -1,0 +1,215 @@
+<script>
+  const dataElement = document.getElementById('worldcup-simulator-data');
+  const simulatorData = JSON.parse(dataElement?.textContent || '{}');
+  const simulatorMatches = simulatorData.matches || [];
+  const simulatorLabels = simulatorData.labels || {};
+  const storageKey = 'worldcup-2026-simulator-v1';
+  const matchById = new Map(simulatorMatches.map((match) => [match.id, match]));
+  const matchByNumber = new Map(
+    simulatorMatches.filter((match) => match.num).map((match) => [String(match.num), match])
+  );
+
+  function readPicks() {
+    try {
+      const stored = JSON.parse(localStorage.getItem(storageKey) || '{}');
+      return stored && typeof stored === 'object' && !Array.isArray(stored) ? stored : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function writePicks(picks) {
+    localStorage.setItem(storageKey, JSON.stringify(picks));
+  }
+
+  function makeStanding(team) {
+    return { team, played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, points: 0 };
+  }
+
+  function applyScore(standing, goalsFor, goalsAgainst) {
+    standing.played += 1;
+    standing.goalsFor += goalsFor;
+    standing.goalsAgainst += goalsAgainst;
+    standing.goalDifference = standing.goalsFor - standing.goalsAgainst;
+
+    if (goalsFor > goalsAgainst) {
+      standing.won += 1;
+      standing.points += 3;
+    } else if (goalsFor === goalsAgainst) {
+      standing.drawn += 1;
+      standing.points += 1;
+    } else {
+      standing.lost += 1;
+    }
+  }
+
+  function getGroupStandings(picks) {
+    const groups = new Map();
+
+    simulatorMatches.filter((match) => match.group).forEach((match) => {
+      const group = groups.get(match.groupCode) || new Map();
+      [match.team1, match.team2].forEach((team) => {
+        if (team.isCountry && !group.has(team.raw)) group.set(team.raw, makeStanding(team));
+      });
+      groups.set(match.groupCode, group);
+    });
+
+    simulatorMatches.filter((match) => match.group).forEach((match) => {
+      const group = groups.get(match.groupCode);
+      const standing1 = group?.get(match.team1.raw);
+      const standing2 = group?.get(match.team2.raw);
+      if (!standing1 || !standing2) return;
+
+      if (match.score1 !== null && match.score2 !== null) {
+        applyScore(standing1, match.score1, match.score2);
+        applyScore(standing2, match.score2, match.score1);
+        return;
+      }
+
+      const picked = picks[match.id];
+      if (!picked) return;
+
+      applyScore(standing1, picked === match.team1.raw ? 1 : 0, picked === match.team1.raw ? 0 : 1);
+      applyScore(standing2, picked === match.team2.raw ? 1 : 0, picked === match.team2.raw ? 0 : 1);
+    });
+
+    return new Map([...groups.entries()].map(([groupCode, standings]) => [
+      groupCode,
+      [...standings.values()].sort((a, b) => {
+        if (b.points !== a.points) return b.points - a.points;
+        if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
+        if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
+        return a.team.label.localeCompare(b.team.label);
+      }),
+    ]));
+  }
+
+  function buildContext() {
+    const picks = readPicks();
+    return { picks, groupStandings: getGroupStandings(picks) };
+  }
+
+  function resolveTeam(team, context) {
+    if (!team) return null;
+    if (team.isCountry) return team;
+
+    const winnerMatch = team.raw.match(/^W(\d+)$/);
+    if (winnerMatch) {
+      const source = matchByNumber.get(winnerMatch[1]);
+      return source ? getWinner(source, context) : null;
+    }
+
+    const loserMatch = team.raw.match(/^L(\d+)$/);
+    if (loserMatch) {
+      const source = matchByNumber.get(loserMatch[1]);
+      const winner = source ? getWinner(source, context) : null;
+      const [team1, team2] = source ? getTeams(source, context) : [];
+      if (!winner || !team1 || !team2) return null;
+      return winner.raw === team1.raw ? team2 : team1;
+    }
+
+    const groupPosition = team.raw.match(/^([123])([A-L](?:\/[A-L])*)$/);
+    if (groupPosition) {
+      const position = Number(groupPosition[1]);
+      const groupCodes = groupPosition[2].split('/');
+
+      if (position === 3 && groupCodes.length > 1) {
+        return groupCodes
+          .map((code) => context.groupStandings.get(code)?.[2])
+          .filter(Boolean)
+          .sort((a, b) => {
+            if (b.points !== a.points) return b.points - a.points;
+            if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
+            return a.team.label.localeCompare(b.team.label);
+          })[0]?.team || null;
+      }
+
+      return context.groupStandings.get(groupCodes[0])?.[position - 1]?.team || null;
+    }
+
+    return null;
+  }
+
+  function getTeams(match, context) {
+    return [resolveTeam(match.team1, context), resolveTeam(match.team2, context)];
+  }
+
+  function getRealWinner(match, context) {
+    if (match.score1 === null || match.score2 === null || match.score1 === match.score2) return null;
+    const [team1, team2] = getTeams(match, context);
+    return match.score1 > match.score2 ? team1 : team2;
+  }
+
+  function getPickedWinner(match, context) {
+    const picked = context.picks[match.id];
+    const [team1, team2] = getTeams(match, context);
+
+    if (picked === team1?.raw) return team1;
+    if (picked === team2?.raw) return team2;
+    return null;
+  }
+
+  function getWinner(match, context) {
+    return getRealWinner(match, context) || getPickedWinner(match, context);
+  }
+
+  function patchMatch(match, context) {
+    const buttons = [...document.querySelectorAll(`[data-pick="${match.id}"]`)];
+    if (buttons.length < 2) return;
+
+    const [team1, team2] = getTeams(match, context);
+    const realWinner = getRealWinner(match, context);
+    const pickedWinner = getPickedWinner(match, context);
+    const winner = realWinner || pickedWinner;
+    const resolvedTeams = [team1, team2];
+
+    buttons.forEach((button, index) => {
+      const team = resolvedTeams[index];
+      if (!team) return;
+
+      button.setAttribute('data-team', team.raw);
+      button.classList.toggle('is-selected', winner?.raw === team.raw);
+
+      if (realWinner) {
+        button.setAttribute('disabled', '');
+      } else {
+        button.removeAttribute('disabled');
+      }
+    });
+
+    const card = buttons[0].closest('.sim-match');
+    const status = card?.querySelector('.sim-status');
+    card?.classList.toggle('is-decided', Boolean(winner));
+
+    if (!status || realWinner) return;
+
+    status.textContent = pickedWinner ? simulatorLabels.simulated : simulatorLabels.pending;
+    status.classList.toggle('status-simulated', Boolean(pickedWinner));
+    status.classList.toggle('status-pending', !pickedWinner);
+  }
+
+  function patchKnockouts() {
+    const context = buildContext();
+    simulatorMatches.filter((match) => !match.group).forEach((match) => patchMatch(match, context));
+  }
+
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest?.('[data-pick]');
+    if (!button || button.disabled) return;
+
+    const match = matchById.get(button.getAttribute('data-pick'));
+    const team = button.getAttribute('data-team');
+    if (!match || !team || getRealWinner(match, buildContext())) return;
+
+    const picks = readPicks();
+    picks[match.id] = team;
+    writePicks(picks);
+    requestAnimationFrame(patchKnockouts);
+  }, true);
+
+  const board = document.querySelector('[data-simulator-board]');
+  const observer = new MutationObserver(() => requestAnimationFrame(patchKnockouts));
+
+  if (board) observer.observe(board, { childList: true, subtree: true });
+  requestAnimationFrame(patchKnockouts);
+</script>

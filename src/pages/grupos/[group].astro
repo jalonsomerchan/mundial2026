@@ -7,8 +7,6 @@ import { useTranslations } from '../../i18n/ui';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getGroupSlug } from '../../utils/groups';
 
-const summary = await getWorldCupSummary();
-
 export async function getStaticPaths() {
   const summary = await getWorldCupSummary();
 

@@ -145,7 +145,9 @@ describe('project smoke checks', () => {
 
     assert.match(dataHelper, /openfootball\/worldcup\.json/);
     assert.match(dataHelper, /fallbackData/);
-    assert.match(explorer, /WorldCupExplorer/);
+    assert.match(explorer, /hero-shell/);
+    assert.match(explorer, /match-grid/);
+    assert.match(home, /WorldCupExplorer/);
     assert.match(home, /getWorldCupSummary/);
   });
 

@@ -1,0 +1,169 @@
+---
+import CalendarMatchRow from './CalendarMatchRow.astro';
+import LocalMatchTimeScript from './LocalMatchTimeScript.astro';
+import TeamLink from './TeamLink.astro';
+import type { Locale } from '../config/site';
+import type { TeamSummary } from '../utils/teams';
+import { getCountryFlagUrl, getCountryName } from '../i18n/countries';
+import { useTranslations } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+  team: TeamSummary;
+}
+
+const { locale, team } = Astro.props;
+const t = useTranslations(locale);
+const teamLabel = getCountryName(team.name, locale);
+const flagUrl = getCountryFlagUrl(team.name);
+const firstGroup = team.groups[0] ?? t('team.noGroup');
+---
+
+<article class="team-page">
+  <header class="team-hero">
+    <p class="eyebrow">{t('team.eyebrow')}</p>
+    <div class="team-title-row">
+      {flagUrl && <img src={flagUrl} width="72" height="72" alt="" decoding="async" />}
+      <div>
+        <h1>{teamLabel}</h1>
+        <p>{t('team.description')}</p>
+      </div>
+    </div>
+  </header>
+
+  <section class="team-summary" aria-label={t('team.summaryTitle')}>
+    <div>
+      <span>{firstGroup}</span>
+      <p>{t('team.groupLabel')}</p>
+    </div>
+    <div>
+      <span>{team.matches.length}</span>
+      <p>{t('team.matchesLabel')}</p>
+    </div>
+  </section>
+
+  <section class="team-section" aria-labelledby="team-calendar-title">
+    <div class="section-heading">
+      <p class="eyebrow">{t('team.calendarEyebrow')}</p>
+      <h2 id="team-calendar-title">{t('team.calendarTitle')}</h2>
+      <p>{t('team.calendarDescription')}</p>
+    </div>
+    <div class="team-matches">
+      {team.matches.map((match) => <CalendarMatchRow locale={locale} match={match} />)}
+    </div>
+  </section>
+</article>
+
+<LocalMatchTimeScript />
+
+<style>
+  .team-page {
+    padding: var(--space-16) 0;
+  }
+
+  .team-hero {
+    max-width: 52rem;
+    margin-bottom: var(--space-8);
+  }
+
+  .eyebrow {
+    margin: 0 0 var(--space-3);
+    color: var(--color-primary);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .team-title-row {
+    align-items: center;
+    display: flex;
+    gap: var(--space-4);
+  }
+
+  .team-title-row img {
+    border-radius: var(--radius-full);
+    flex: 0 0 auto;
+  }
+
+  h1,
+  h2,
+  p {
+    margin-top: 0;
+  }
+
+  h1 {
+    margin-bottom: var(--space-4);
+    font-size: clamp(2.4rem, 11vw, 4.8rem);
+    font-weight: 900;
+    letter-spacing: -0.075em;
+    line-height: 0.95;
+  }
+
+  .team-hero p:not(.eyebrow),
+  .section-heading p {
+    color: var(--color-text-muted);
+    font-size: 1.05rem;
+    line-height: 1.75;
+  }
+
+  .team-summary {
+    display: grid;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+  }
+
+  .team-summary div,
+  .team-section {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .team-summary div {
+    padding: var(--space-5);
+  }
+
+  .team-summary span {
+    color: var(--color-text);
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+  }
+
+  .team-summary p {
+    color: var(--color-text-muted);
+    font-weight: 750;
+    margin: var(--space-1) 0 0;
+  }
+
+  .team-section {
+    padding: var(--space-5);
+  }
+
+  .section-heading {
+    margin-bottom: var(--space-5);
+    max-width: 46rem;
+  }
+
+  .section-heading h2 {
+    font-size: clamp(1.65rem, 7vw, 2.6rem);
+    font-weight: 900;
+    letter-spacing: -0.055em;
+    line-height: 1.05;
+    margin-bottom: var(--space-3);
+  }
+
+  .team-matches {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  @media (min-width: 720px) {
+    .team-summary {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

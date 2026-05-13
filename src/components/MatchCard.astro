@@ -1,0 +1,209 @@
+---
+import type { Locale } from '../config/site';
+import type { WorldCupMatch } from '../data/worldcup2026';
+import { getCountryFlagUrl, getCountryName } from '../i18n/countries';
+import { useTranslations } from '../i18n/ui';
+import { getMatchResult, getMatchUtcIso } from '../utils/matches';
+
+interface Props {
+  locale: Locale;
+  match: WorldCupMatch;
+}
+
+const { locale, match } = Astro.props;
+const t = useTranslations(locale);
+const matchIso = getMatchUtcIso(match);
+const result = getMatchResult(match);
+
+function getTeamLabel(team: string) {
+  return getCountryName(team, locale);
+}
+
+function getTeamFlag(team: string) {
+  return getCountryFlagUrl(team);
+}
+---
+
+<article class="match-card">
+  <header class="match-header">
+    <span class="match-badge">{match.group ?? match.round}</span>
+    <time class="match-date js-local-date" datetime={matchIso}>{match.date}</time>
+  </header>
+
+  <div class="scoreboard" aria-label={`${getTeamLabel(match.team1)} ${result} ${getTeamLabel(match.team2)}`}>
+    <div class="team team-home">
+      {getTeamFlag(match.team1) && (
+        <img src={getTeamFlag(match.team1) ?? ''} width="40" height="40" alt="" loading="lazy" decoding="async" />
+      )}
+      <span>{getTeamLabel(match.team1)}</span>
+    </div>
+
+    <div class="result-box">
+      <span class="result-label">{t('home.result')}</span>
+      <strong>{result}</strong>
+    </div>
+
+    <div class="team team-away">
+      {getTeamFlag(match.team2) && (
+        <img src={getTeamFlag(match.team2) ?? ''} width="40" height="40" alt="" loading="lazy" decoding="async" />
+      )}
+      <span>{getTeamLabel(match.team2)}</span>
+    </div>
+  </div>
+
+  <dl class="match-details">
+    <div>
+      <dt>{t('home.round')}</dt>
+      <dd>{match.round}</dd>
+    </div>
+    <div>
+      <dt>{t('home.localTime')}</dt>
+      <dd>
+        <time class="js-local-time" datetime={matchIso}>{match.time}</time>
+      </dd>
+    </div>
+    <div>
+      <dt>{t('home.venue')}</dt>
+      <dd>{match.ground}</dd>
+    </div>
+  </dl>
+</article>
+
+<style>
+  .match-card {
+    background:
+      linear-gradient(145deg, color-mix(in srgb, var(--color-primary-soft), transparent 55%), transparent 44%),
+      var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-xs);
+    overflow: hidden;
+    padding: var(--space-5);
+    transition:
+      transform var(--transition-base),
+      border-color var(--transition-base),
+      box-shadow var(--transition-base);
+  }
+
+  .match-card:hover {
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-2px);
+  }
+
+  .match-header {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    justify-content: space-between;
+    margin-bottom: var(--space-5);
+  }
+
+  .match-badge,
+  .match-date {
+    background: var(--color-primary-soft);
+    border-radius: var(--radius-full);
+    color: var(--color-primary);
+    font-size: 0.8rem;
+    font-weight: 850;
+    padding: 0.35rem 0.7rem;
+  }
+
+  .scoreboard {
+    align-items: center;
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .team {
+    align-items: center;
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: auto minmax(0, 1fr);
+    min-width: 0;
+  }
+
+  .team img {
+    border-radius: var(--radius-full);
+    filter: drop-shadow(0 8px 16px rgb(15 23 42 / 0.12));
+  }
+
+  .team span {
+    color: var(--color-text);
+    font-size: clamp(1.3rem, 7vw, 2rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    overflow-wrap: anywhere;
+  }
+
+  .result-box {
+    align-items: center;
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    display: grid;
+    justify-items: center;
+    min-height: 4.5rem;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .result-label {
+    color: var(--color-text-soft);
+    font-size: 0.72rem;
+    font-weight: 850;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .result-box strong {
+    color: var(--color-text);
+    font-size: clamp(2rem, 10vw, 3rem);
+    font-weight: 950;
+    letter-spacing: -0.08em;
+    line-height: 1;
+  }
+
+  .match-details {
+    border-top: 1px solid var(--color-border);
+    display: grid;
+    gap: var(--space-4);
+    margin: var(--space-5) 0 0;
+    padding-top: var(--space-5);
+  }
+
+  dt {
+    color: var(--color-text-soft);
+    font-size: 0.76rem;
+    font-weight: 850;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  dd {
+    color: var(--color-text-muted);
+    font-weight: 750;
+    margin: var(--space-1) 0 0;
+  }
+
+  @media (min-width: 560px) {
+    .scoreboard {
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    }
+
+    .team-away {
+      grid-template-columns: minmax(0, 1fr) auto;
+      text-align: right;
+    }
+
+    .team-away img {
+      order: 2;
+    }
+
+    .match-details {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

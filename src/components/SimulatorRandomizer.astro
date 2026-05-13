@@ -1,17 +1,112 @@
 ---
 interface Props {
-  label: string;
+  randomizeLabel: string;
+  shareLabel: string;
+  clearLabel: string;
+  copiedLabel: string;
 }
 
-const { label } = Astro.props;
+const { randomizeLabel, shareLabel, clearLabel, copiedLabel } = Astro.props;
 ---
 
-<div class="simulator-randomizer">
-  <button class="random-button" type="button" data-randomize-simulator>{label}</button>
+<div class="simulator-randomizer" data-simulator-actions>
+  <button class="random-button" type="button" data-randomize-simulator>{randomizeLabel}</button>
+  <button class="share-button" type="button" data-share-simulator>{shareLabel}</button>
+  <button class="clear-button" type="button" data-clear-simulator>{clearLabel}</button>
+  <p class="share-feedback" aria-live="polite" data-share-feedback></p>
 </div>
 
-<script>
+<script define:vars={{ copiedLabel }}>
+  const storageKey = 'worldcup-2026-simulator-v1';
+  const predictionQueryKey = 'p';
   const randomizeButton = document.querySelector('[data-randomize-simulator]');
+  const shareButton = document.querySelector('[data-share-simulator]');
+  const clearButton = document.querySelector('[data-clear-simulator]');
+  const feedback = document.querySelector('[data-share-feedback]');
+
+  function encodePrediction(prediction) {
+    const json = JSON.stringify(prediction);
+    const bytes = new TextEncoder().encode(json);
+    let binary = '';
+    bytes.forEach((byte) => {
+      binary += String.fromCharCode(byte);
+    });
+
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+  }
+
+  function decodePrediction(value) {
+    try {
+      const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
+      const binary = atob(padded);
+      const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+      const parsed = JSON.parse(new TextDecoder().decode(bytes));
+
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function getUrlPrediction() {
+    const params = new URLSearchParams(window.location.search);
+    const sharedPrediction = params.get(predictionQueryKey);
+
+    return sharedPrediction ? decodePrediction(sharedPrediction) : null;
+  }
+
+  function loadSharedPrediction() {
+    const sharedPrediction = getUrlPrediction();
+
+    if (sharedPrediction) {
+      localStorage.setItem(storageKey, JSON.stringify(sharedPrediction));
+    }
+  }
+
+  function getStoredPrediction() {
+    try {
+      const storedPrediction = JSON.parse(localStorage.getItem(storageKey) || '{}');
+      return storedPrediction && typeof storedPrediction === 'object' && !Array.isArray(storedPrediction)
+        ? storedPrediction
+        : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function buildShareUrl() {
+    const url = new URL(window.location.href);
+    const prediction = getStoredPrediction();
+    url.searchParams.set(predictionQueryKey, encodePrediction(prediction));
+    url.hash = '';
+
+    return url.toString();
+  }
+
+  async function sharePrediction() {
+    const url = buildShareUrl();
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ url });
+      } catch {
+        return;
+      }
+    } else if (navigator.clipboard) {
+      await navigator.clipboard.writeText(url);
+    }
+
+    if (feedback) {
+      feedback.textContent = copiedLabel;
+    }
+  }
+
+  function cleanPredictionUrl() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete(predictionQueryKey);
+    window.history.replaceState({}, '', url);
+  }
 
   function getAvailableMatches() {
     const buttons = [...document.querySelectorAll('[data-pick]:not(:disabled)')];
@@ -47,5 +142,18 @@ const { label } = Astro.props;
     }
   }
 
+  function clearPrediction() {
+    localStorage.removeItem(storageKey);
+    cleanPredictionUrl();
+    document.querySelector('[data-reset-simulator]')?.click();
+
+    if (feedback) {
+      feedback.textContent = '';
+    }
+  }
+
+  loadSharedPrediction();
   randomizeButton?.addEventListener('click', randomizeSimulator);
+  shareButton?.addEventListener('click', sharePrediction);
+  clearButton?.addEventListener('click', clearPrediction);
 </script>

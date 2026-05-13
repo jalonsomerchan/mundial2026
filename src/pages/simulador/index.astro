@@ -1,5 +1,6 @@
 ---
 import Container from '../../components/Container.astro';
+import SimulatorKnockoutPatch from '../../components/SimulatorKnockoutPatch.astro';
 import SimulatorRandomizer from '../../components/SimulatorRandomizer.astro';
 import WorldCupSimulator from '../../components/WorldCupSimulator.astro';
 import { defaultLocale } from '../../config/site';
@@ -22,5 +23,6 @@ const summary = await getWorldCupSummary();
       copiedLabel={t('simulator.shareCopied')}
     />
     <WorldCupSimulator locale={locale} summary={summary} />
+    <SimulatorKnockoutPatch />
   </Container>
 </BaseLayout>

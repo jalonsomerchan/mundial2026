@@ -99,7 +99,7 @@ describe('project smoke checks', () => {
   });
 
   it('keeps basic template components available', () => {
-    ['Button', 'CalendarMatchRow', 'Container', 'Footer', 'GroupPage', 'GroupStandingsTable', 'Header', 'LocalMatchTimeScript', 'MatchCalendar', 'MatchCard', 'MatchDetailPage', 'MatchScoreboard', 'SimulatorRandomizer', 'TeamLink', 'TeamPage', 'VenueLink', 'VenuePage', 'WorldCupExplorer', 'WorldCupSimulator'].forEach((component) => {
+    ['Button', 'CalendarMatchRow', 'Container', 'Footer', 'GroupPage', 'GroupStandingsTable', 'Header', 'LocalMatchTimeScript', 'MatchCalendar', 'MatchCard', 'MatchDetailPage', 'MatchScoreboard', 'SimulatorKnockoutPatch', 'SimulatorRandomizer', 'TeamLink', 'TeamPage', 'VenueLink', 'VenuePage', 'WorldCupExplorer', 'WorldCupSimulator'].forEach((component) => {
       assert.equal(
         existsSync(join(root, `src/components/${component}.astro`)),
         true,
@@ -175,6 +175,13 @@ describe('project smoke checks', () => {
       assert.ok(translations['routes.venues'], `${locale}.json should include routes.venues`);
       assert.ok(translations['routes.simulator'], `${locale}.json should include routes.simulator`);
     });
+  });
+
+  it('keeps global heading style aligned with the design request', () => {
+    const globalStyles = readText('src/styles/global.css');
+
+    assert.match(globalStyles, /h1\s*\{/);
+    assert.match(globalStyles, /font-weight:\s*400\s*!important/);
   });
 
   it('keeps the World Cup data source and homepage wired', () => {
@@ -313,6 +320,7 @@ describe('project smoke checks', () => {
 
   it('keeps the simulator page wired', () => {
     const simulator = readText('src/components/WorldCupSimulator.astro');
+    const knockoutPatch = readText('src/components/SimulatorKnockoutPatch.astro');
     const randomizer = readText('src/components/SimulatorRandomizer.astro');
     const spanishPage = readText('src/pages/simulador/index.astro');
     const englishPage = readText('src/pages/en/simulator/index.astro');
@@ -324,6 +332,13 @@ describe('project smoke checks', () => {
     assert.match(simulator, /getGroupStandings/);
     assert.match(simulator, /resolveToken/);
     assert.match(simulator, /data-pick/);
+    assert.match(knockoutPatch, /MutationObserver/);
+    assert.match(knockoutPatch, /resolveTeam/);
+    assert.match(knockoutPatch, /getWinner/);
+    assert.match(knockoutPatch, /patchChampion/);
+    assert.match(knockoutPatch, /data-simulator-champion/);
+    assert.match(knockoutPatch, /data-pick/);
+    assert.match(knockoutPatch, /localStorage/);
     assert.match(randomizer, /data-randomize-simulator/);
     assert.match(randomizer, /data-share-simulator/);
     assert.match(randomizer, /data-clear-simulator/);
@@ -336,11 +351,15 @@ describe('project smoke checks', () => {
     assert.match(randomizer, /getAvailableMatches/);
     assert.match(randomizer, /Math\.random/);
     assert.match(spanishPage, /SimulatorRandomizer/);
+    assert.match(spanishPage, /SimulatorKnockoutPatch/);
     assert.match(spanishPage, /shareLabel/);
     assert.match(spanishPage, /clearLabel/);
     assert.match(englishPage, /SimulatorRandomizer/);
+    assert.match(englishPage, /SimulatorKnockoutPatch/);
     assert.match(englishPage, /shareLabel/);
     assert.match(englishPage, /clearLabel/);
+    assert.match(simulatorStyles, /\.simulator-hero/);
+    assert.match(simulatorStyles, /font-weight:\s*400/);
     assert.match(simulatorStyles, /random-button/);
     assert.match(simulatorStyles, /share-button/);
     assert.match(simulatorStyles, /clear-button/);

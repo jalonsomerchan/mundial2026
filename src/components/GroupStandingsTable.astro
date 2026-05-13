@@ -1,6 +1,6 @@
 ---
+import TeamLink from './TeamLink.astro';
 import type { Locale } from '../config/site';
-import { getCountryFlagUrl, getCountryName } from '../i18n/countries';
 import { useTranslations } from '../i18n/ui';
 import type { TeamStanding } from '../utils/groups';
 
@@ -11,14 +11,6 @@ interface Props {
 
 const { locale, standings } = Astro.props;
 const t = useTranslations(locale);
-
-function getTeamLabel(team: string) {
-  return getCountryName(team, locale);
-}
-
-function getTeamFlag(team: string) {
-  return getCountryFlagUrl(team);
-}
 ---
 
 <div class="standings-table-wrapper">
@@ -41,12 +33,7 @@ function getTeamFlag(team: string) {
         <tr>
           <td>{index + 1}</td>
           <th scope="row">
-            <span class="team-name">
-              {getTeamFlag(standing.team) && (
-                <img src={getTeamFlag(standing.team) ?? ''} width="24" height="24" alt="" loading="lazy" decoding="async" />
-              )}
-              {getTeamLabel(standing.team)}
-            </span>
+            <span class="team-name"><TeamLink locale={locale} team={standing.team} /></span>
           </th>
           <td>{standing.played}</td>
           <td>{standing.won}</td>
@@ -111,10 +98,5 @@ function getTeamFlag(team: string) {
     align-items: center;
     display: inline-flex;
     gap: var(--space-2);
-  }
-
-  .team-name img {
-    border-radius: var(--radius-full);
-    flex: 0 0 auto;
   }
 </style>

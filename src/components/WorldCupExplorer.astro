@@ -1,4 +1,5 @@
 ---
+import MatchCard from './MatchCard.astro';
 import type { Locale } from '../config/site';
 import type { WorldCupSummary } from '../data/worldcup2026';
 import { getCountryFlagUrl, getCountryName } from '../i18n/countries';
@@ -17,15 +18,6 @@ const highlightedMatches = summary.matches.slice(0, 8);
 const featuredTeams = [...new Set(groupMatches.flatMap((match) => [match.team1, match.team2]))].sort((a, b) =>
   getCountryName(a, locale).localeCompare(getCountryName(b, locale), locale)
 );
-const dateFormatter = new Intl.DateTimeFormat(locale, {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-});
-
-function formatDate(date: string) {
-  return dateFormatter.format(new Date(`${date}T12:00:00Z`));
-}
 
 function getTeamLabel(team: string) {
   return getCountryName(team, locale);
@@ -79,43 +71,7 @@ function getTeamFlag(team: string) {
   </div>
 
   <div class="match-grid">
-    {highlightedMatches.map((match) => (
-      <article class="match-card">
-        <div class="match-meta">
-          <span>{match.group ?? match.round}</span>
-          <time datetime={match.date}>{formatDate(match.date)}</time>
-        </div>
-        <h3 class="match-title">
-          <span class="team-name">
-            {getTeamFlag(match.team1) && (
-              <img src={getTeamFlag(match.team1) ?? ''} width="28" height="28" alt="" loading="lazy" decoding="async" />
-            )}
-            {getTeamLabel(match.team1)}
-          </span>
-          <span class="versus">{t('home.versus')}</span>
-          <span class="team-name">
-            {getTeamFlag(match.team2) && (
-              <img src={getTeamFlag(match.team2) ?? ''} width="28" height="28" alt="" loading="lazy" decoding="async" />
-            )}
-            {getTeamLabel(match.team2)}
-          </span>
-        </h3>
-        <dl>
-          <div>
-            <dt>{t('home.round')}</dt>
-            <dd>{match.round}</dd>
-          </div>
-          <div>
-            <dt>{t('home.time')}</dt>
-            <dd>{match.time}</dd>
-          </div>
-          <div>
-            <dt>{t('home.venue')}</dt>
-            <dd>{match.ground}</dd>
-          </div>
-        </dl>
-      </article>
-    ))}
+    {highlightedMatches.map((match) => <MatchCard locale={locale} match={match} />)}
   </div>
 </section>
 
@@ -179,6 +135,36 @@ function getTeamFlag(team: string) {
     </article>
   </div>
 </section>
+
+<script>
+  const locale = document.documentElement.lang || 'es';
+  const dateFormatter = new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+  const timeFormatter = new Intl.DateTimeFormat(locale, {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  });
+
+  document.querySelectorAll('.js-local-date').forEach((element) => {
+    const date = new Date(element.getAttribute('datetime') ?? '');
+
+    if (!Number.isNaN(date.getTime())) {
+      element.textContent = dateFormatter.format(date);
+    }
+  });
+
+  document.querySelectorAll('.js-local-time').forEach((element) => {
+    const date = new Date(element.getAttribute('datetime') ?? '');
+
+    if (!Number.isNaN(date.getTime())) {
+      element.textContent = timeFormatter.format(date);
+    }
+  });
+</script>
 
 <style>
   .hero-shell {
@@ -286,7 +272,6 @@ function getTeamFlag(team: string) {
 
   .stats-card,
   .notice-card,
-  .match-card,
   .group-card,
   .list-card {
     background: var(--color-surface);
@@ -362,26 +347,11 @@ function getTeamFlag(team: string) {
     gap: var(--space-4);
   }
 
-  .match-card,
   .group-card,
   .list-card {
     padding: var(--space-5);
   }
 
-  .match-card {
-    transition:
-      transform var(--transition-base),
-      border-color var(--transition-base),
-      box-shadow var(--transition-base);
-  }
-
-  .match-card:hover {
-    border-color: var(--color-border-strong);
-    box-shadow: var(--shadow-sm);
-    transform: translateY(-2px);
-  }
-
-  .match-meta,
   .group-card-header {
     align-items: center;
     display: flex;
@@ -391,8 +361,6 @@ function getTeamFlag(team: string) {
     margin-bottom: var(--space-4);
   }
 
-  .match-meta span,
-  .match-meta time,
   .group-card-header span {
     background: var(--color-primary-soft);
     border-radius: var(--radius-full);
@@ -400,16 +368,6 @@ function getTeamFlag(team: string) {
     font-size: 0.8rem;
     font-weight: 850;
     padding: 0.35rem 0.7rem;
-  }
-
-  .match-title {
-    display: grid;
-    gap: var(--space-2);
-  }
-
-  .versus {
-    color: var(--color-text-soft);
-    font-size: 0.82em;
   }
 
   .team-name,
@@ -423,25 +381,6 @@ function getTeamFlag(team: string) {
   .team-pill img {
     border-radius: var(--radius-full);
     flex: 0 0 auto;
-  }
-
-  dl {
-    display: grid;
-    gap: var(--space-3);
-    margin: var(--space-5) 0 0;
-  }
-
-  dt {
-    color: var(--color-text-soft);
-    font-size: 0.78rem;
-    font-weight: 800;
-    text-transform: uppercase;
-  }
-
-  dd {
-    margin: var(--space-1) 0 0;
-    color: var(--color-text-muted);
-    font-weight: 650;
   }
 
   .group-card ul,

@@ -26,8 +26,15 @@ function getTeamFlag(team: string) {
 
 <article class="match-card">
   <header class="match-header">
-    <span class="match-badge">{match.group ?? match.round}</span>
-    <time class="match-date js-local-date" datetime={matchIso}>{match.date}</time>
+    <div class="match-kicker">
+      <span class="match-badge">{match.group ?? match.round}</span>
+      <span class="match-countdown js-match-countdown" data-match-time={matchIso}>{t('home.countdownPending')}</span>
+    </div>
+    <time class="match-date-time" datetime={matchIso}>
+      <span class="js-local-date" datetime={matchIso}>{match.date}</span>
+      <span aria-hidden="true">·</span>
+      <span class="js-local-time" datetime={matchIso}>{match.time}</span>
+    </time>
   </header>
 
   <div class="scoreboard" aria-label={`${getTeamLabel(match.team1)} ${result} ${getTeamLabel(match.team2)}`}>
@@ -58,12 +65,6 @@ function getTeamFlag(team: string) {
       <dd>{match.round}</dd>
     </div>
     <div>
-      <dt>{t('home.localTime')}</dt>
-      <dd>
-        <time class="js-local-time" datetime={matchIso}>{match.time}</time>
-      </dd>
-    </div>
-    <div>
       <dt>{t('home.venue')}</dt>
       <dd>{match.ground}</dd>
     </div>
@@ -92,22 +93,45 @@ function getTeamFlag(team: string) {
   }
 
   .match-header {
+    display: grid;
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
+  }
+
+  .match-kicker {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2);
     justify-content: space-between;
-    margin-bottom: var(--space-5);
   }
 
   .match-badge,
-  .match-date {
-    background: var(--color-primary-soft);
+  .match-countdown,
+  .match-date-time {
+    align-items: center;
     border-radius: var(--radius-full);
-    color: var(--color-primary);
+    display: inline-flex;
     font-size: 0.8rem;
     font-weight: 850;
+    gap: 0.35rem;
     padding: 0.35rem 0.7rem;
+  }
+
+  .match-badge,
+  .match-date-time {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .match-countdown {
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+
+  .match-date-time {
+    justify-content: center;
+    width: 100%;
   }
 
   .scoreboard {
@@ -199,7 +223,7 @@ function getTeamFlag(team: string) {
 
   @media (min-width: 560px) {
     .match-details {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 </style>

@@ -148,6 +148,25 @@ function getTeamFlag(team: string) {
     minute: '2-digit',
     timeZoneName: 'short',
   });
+  const relativeFormatter = new Intl.RelativeTimeFormat(locale, { numeric: 'always' });
+
+  function formatCountdown(date) {
+    const diffMs = date.getTime() - Date.now();
+    const absMs = Math.abs(diffMs);
+    const minute = 60 * 1000;
+    const hour = 60 * minute;
+    const day = 24 * hour;
+
+    if (absMs < hour) {
+      return relativeFormatter.format(Math.round(diffMs / minute), 'minute');
+    }
+
+    if (absMs < day) {
+      return relativeFormatter.format(Math.round(diffMs / hour), 'hour');
+    }
+
+    return relativeFormatter.format(Math.round(diffMs / day), 'day');
+  }
 
   document.querySelectorAll('.js-local-date').forEach((element) => {
     const date = new Date(element.getAttribute('datetime') ?? '');
@@ -162,6 +181,14 @@ function getTeamFlag(team: string) {
 
     if (!Number.isNaN(date.getTime())) {
       element.textContent = timeFormatter.format(date);
+    }
+  });
+
+  document.querySelectorAll('.js-match-countdown').forEach((element) => {
+    const date = new Date(element.getAttribute('data-match-time') ?? '');
+
+    if (!Number.isNaN(date.getTime())) {
+      element.textContent = formatCountdown(date);
     }
   });
 </script>

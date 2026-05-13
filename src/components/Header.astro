@@ -23,7 +23,7 @@ const alternateLocales = getAlternateLocales(locale);
       {alternateLocales.map((alternateLocale) => (
         <a
           class="rounded-full border border-[var(--color-border)] px-3 py-1 text-xs font-bold hover:text-[var(--color-text)]"
-          href={getLocalizedRoutePath('routes.calendar', alternateLocale)}
+          href={getLocalizedPath('/', alternateLocale)}
           hreflang={alternateLocale}
         >
           {localeLabels[alternateLocale]}

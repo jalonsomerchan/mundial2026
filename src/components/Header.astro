@@ -1,7 +1,7 @@
 ---
 import Container from './Container.astro';
 import { localeLabels, siteConfig, type Locale } from '../config/site';
-import { getAlternateLocales, getLocalizedPath, useTranslations } from '../i18n/ui';
+import { getAlternateLocales, getLocalizedPath, getLocalizedRoutePath, useTranslations } from '../i18n/ui';
 
 interface Props {
   locale: Locale;
@@ -10,7 +10,7 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 const homeUrl = getLocalizedPath('/', locale);
-const calendarUrl = getLocalizedPath(t('routes.calendar'), locale);
+const calendarUrl = getLocalizedRoutePath('routes.calendar', locale);
 const alternateLocales = getAlternateLocales(locale);
 ---
 
@@ -23,7 +23,7 @@ const alternateLocales = getAlternateLocales(locale);
       {alternateLocales.map((alternateLocale) => (
         <a
           class="rounded-full border border-[var(--color-border)] px-3 py-1 text-xs font-bold hover:text-[var(--color-text)]"
-          href={getLocalizedPath(t('routes.calendar'), alternateLocale)}
+          href={getLocalizedRoutePath('routes.calendar', alternateLocale)}
           hreflang={alternateLocale}
         >
           {localeLabels[alternateLocale]}

@@ -1,0 +1,27 @@
+---
+import type { Locale } from '../config/site';
+import { getVenuePath } from '../utils/venues';
+
+interface Props {
+  locale: Locale;
+  venue: string;
+  class?: string;
+}
+
+const { locale, venue } = Astro.props;
+const className = Astro.props.class ?? '';
+---
+
+<a class={`venue-link ${className}`} href={getVenuePath(venue, locale)}>{venue}</a>
+
+<style>
+  .venue-link {
+    color: inherit;
+    font-weight: inherit;
+    text-decoration: none;
+  }
+
+  .venue-link:hover {
+    color: var(--color-primary);
+  }
+</style>

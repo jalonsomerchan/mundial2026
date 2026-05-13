@@ -2,21 +2,12 @@ import type { Locale } from '../config/site';
 import type { WorldCupMatch } from '../data/worldcup2026';
 import { isKnownCountry } from '../i18n/countries';
 import { getLocalizedPath, translate } from '../i18n/ui';
+import { normalizeSlug } from './slugs';
 
 export interface TeamSummary {
   name: string;
   matches: WorldCupMatch[];
   groups: string[];
-}
-
-function normalizeSlug(value: string) {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/&/g, 'and')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
 }
 
 export function getTeamSlug(team: string) {

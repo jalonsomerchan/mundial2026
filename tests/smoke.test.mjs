@@ -52,6 +52,10 @@ describe('project smoke checks', () => {
       'src/pages/en/groups/[group].astro',
       'src/pages/selecciones/[team].astro',
       'src/pages/en/teams/[team].astro',
+      'src/pages/partidos/[match].astro',
+      'src/pages/en/matches/[match].astro',
+      'src/pages/sedes/[venue].astro',
+      'src/pages/en/venues/[venue].astro',
       'src/pages/simulador/index.astro',
       'src/pages/en/simulator/index.astro',
       'src/pages/404.astro',
@@ -68,7 +72,9 @@ describe('project smoke checks', () => {
       'src/utils/calendar.ts',
       'src/utils/groups.ts',
       'src/utils/matches.ts',
+      'src/utils/slugs.ts',
       'src/utils/teams.ts',
+      'src/utils/venues.ts',
     ].forEach((path) => {
       assert.equal(existsSync(join(root, path)), true, `${path} should exist`);
     });
@@ -93,7 +99,7 @@ describe('project smoke checks', () => {
   });
 
   it('keeps basic template components available', () => {
-    ['Button', 'CalendarMatchRow', 'Container', 'Footer', 'GroupPage', 'GroupStandingsTable', 'Header', 'LocalMatchTimeScript', 'MatchCalendar', 'MatchCard', 'SimulatorRandomizer', 'TeamLink', 'TeamPage', 'WorldCupExplorer', 'WorldCupSimulator'].forEach((component) => {
+    ['Button', 'CalendarMatchRow', 'Container', 'Footer', 'GroupPage', 'GroupStandingsTable', 'Header', 'LocalMatchTimeScript', 'MatchCalendar', 'MatchCard', 'MatchDetailPage', 'MatchScoreboard', 'SimulatorRandomizer', 'TeamLink', 'TeamPage', 'VenueLink', 'VenuePage', 'WorldCupExplorer', 'WorldCupSimulator'].forEach((component) => {
       assert.equal(
         existsSync(join(root, `src/components/${component}.astro`)),
         true,
@@ -155,6 +161,8 @@ describe('project smoke checks', () => {
       assert.ok(translations['calendar.title'], `${locale}.json should include calendar.title`);
       assert.ok(translations['group.standingsTitle'], `${locale}.json should include group.standingsTitle`);
       assert.ok(translations['team.calendarTitle'], `${locale}.json should include team.calendarTitle`);
+      assert.ok(translations['match.detailsTitle'], `${locale}.json should include match.detailsTitle`);
+      assert.ok(translations['venue.matchesTitle'], `${locale}.json should include venue.matchesTitle`);
       assert.ok(translations['simulator.title'], `${locale}.json should include simulator.title`);
       assert.ok(translations['simulator.randomize'], `${locale}.json should include simulator.randomize`);
       assert.ok(translations['simulator.share'], `${locale}.json should include simulator.share`);
@@ -163,6 +171,8 @@ describe('project smoke checks', () => {
       assert.ok(translations['routes.calendar'], `${locale}.json should include routes.calendar`);
       assert.ok(translations['routes.groups'], `${locale}.json should include routes.groups`);
       assert.ok(translations['routes.teams'], `${locale}.json should include routes.teams`);
+      assert.ok(translations['routes.matches'], `${locale}.json should include routes.matches`);
+      assert.ok(translations['routes.venues'], `${locale}.json should include routes.venues`);
       assert.ok(translations['routes.simulator'], `${locale}.json should include routes.simulator`);
     });
   });
@@ -192,7 +202,7 @@ describe('project smoke checks', () => {
     assert.match(explorer, /TeamLink/);
   });
 
-  it('keeps match cards readable with countdowns, local time and results', () => {
+  it('keeps match cards readable with countdowns, local time, results and details links', () => {
     const dataHelper = readText('src/data/worldcup2026.ts');
     const matchCard = readText('src/components/MatchCard.astro');
     const matchUtils = readText('src/utils/matches.ts');
@@ -203,10 +213,14 @@ describe('project smoke checks', () => {
     assert.match(matchCard, /team-row/);
     assert.match(matchCard, /team-score/);
     assert.match(matchCard, /TeamLink/);
+    assert.match(matchCard, /VenueLink/);
+    assert.match(matchCard, /getMatchPath/);
     assert.match(matchCard, /match-countdown/);
     assert.match(matchCard, /match-date-time/);
     assert.match(matchCard, /js-local-time/);
     assert.match(matchUtils, /return '-'/);
+    assert.match(matchUtils, /getMatchSlug/);
+    assert.match(matchUtils, /getMatchPath/);
     assert.match(localScript, /Intl\.DateTimeFormat/);
     assert.match(localScript, /Intl\.RelativeTimeFormat/);
     assert.match(localScript, /js-match-countdown/);
@@ -224,6 +238,8 @@ describe('project smoke checks', () => {
     assert.match(calendar, /CalendarMatchRow/);
     assert.match(calendarRow, /calendar-match-row/);
     assert.match(calendarRow, /TeamLink/);
+    assert.match(calendarRow, /VenueLink/);
+    assert.match(calendarRow, /getMatchPath/);
     assert.match(calendarRow, /js-local-time/);
     assert.match(calendarUtils, /groupMatchesByDate/);
     assert.match(spanishPage, /MatchCalendar/);
@@ -266,6 +282,33 @@ describe('project smoke checks', () => {
     assert.match(spanishPage, /getStaticPaths/);
     assert.match(englishPage, /getStaticPaths/);
     assert.match(explorer, /TeamLink/);
+  });
+
+  it('keeps match and venue detail pages wired', () => {
+    const matchPage = readText('src/components/MatchDetailPage.astro');
+    const scoreboard = readText('src/components/MatchScoreboard.astro');
+    const venuePage = readText('src/components/VenuePage.astro');
+    const venueLink = readText('src/components/VenueLink.astro');
+    const venuesUtils = readText('src/utils/venues.ts');
+    const spanishMatchPage = readText('src/pages/partidos/[match].astro');
+    const englishMatchPage = readText('src/pages/en/matches/[match].astro');
+    const spanishVenuePage = readText('src/pages/sedes/[venue].astro');
+    const englishVenuePage = readText('src/pages/en/venues/[venue].astro');
+
+    assert.match(matchPage, /MatchScoreboard/);
+    assert.match(matchPage, /VenueLink/);
+    assert.match(matchPage, /getGroupPath/);
+    assert.match(matchPage, /getLocalizedRoutePath/);
+    assert.match(scoreboard, /TeamLink/);
+    assert.match(scoreboard, /getMatchResult/);
+    assert.match(venuePage, /CalendarMatchRow/);
+    assert.match(venueLink, /getVenuePath/);
+    assert.match(venuesUtils, /getVenuePath/);
+    assert.match(venuesUtils, /getVenuesFromMatches/);
+    assert.match(spanishMatchPage, /getStaticPaths/);
+    assert.match(englishMatchPage, /getStaticPaths/);
+    assert.match(spanishVenuePage, /getStaticPaths/);
+    assert.match(englishVenuePage, /getStaticPaths/);
   });
 
   it('keeps the simulator page wired', () => {

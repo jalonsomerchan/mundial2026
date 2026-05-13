@@ -1,0 +1,112 @@
+---
+import CalendarMatchRow from './CalendarMatchRow.astro';
+import GroupStandingsTable from './GroupStandingsTable.astro';
+import LocalMatchTimeScript from './LocalMatchTimeScript.astro';
+import type { Locale } from '../config/site';
+import type { WorldCupGroup } from '../data/worldcup2026';
+import { useTranslations } from '../i18n/ui';
+import { getGroupStandings } from '../utils/groups';
+
+interface Props {
+  locale: Locale;
+  group: WorldCupGroup;
+}
+
+const { locale, group } = Astro.props;
+const t = useTranslations(locale);
+const standings = getGroupStandings(group);
+---
+
+<article class="group-page">
+  <header class="group-hero">
+    <p class="eyebrow">{t('group.eyebrow')}</p>
+    <h1>{t('group.titlePrefix')} {group.name}</h1>
+    <p>{t('group.description')}</p>
+  </header>
+
+  <section class="group-section" aria-labelledby="standings-title">
+    <div class="section-heading">
+      <p class="eyebrow">{t('group.standingsEyebrow')}</p>
+      <h2 id="standings-title">{t('group.standingsTitle')}</h2>
+    </div>
+    <GroupStandingsTable locale={locale} standings={standings} />
+  </section>
+
+  <section class="group-section" aria-labelledby="matches-title">
+    <div class="section-heading">
+      <p class="eyebrow">{t('group.matchesEyebrow')}</p>
+      <h2 id="matches-title">{t('group.matchesTitle')}</h2>
+    </div>
+    <div class="group-matches">
+      {group.matches.map((match) => <CalendarMatchRow locale={locale} match={match} />)}
+    </div>
+  </section>
+</article>
+
+<LocalMatchTimeScript />
+
+<style>
+  .group-page {
+    padding: var(--space-16) 0;
+  }
+
+  .group-hero {
+    max-width: 48rem;
+    margin-bottom: var(--space-10);
+  }
+
+  .eyebrow {
+    margin: 0 0 var(--space-3);
+    color: var(--color-primary);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  h1,
+  h2,
+  p {
+    margin-top: 0;
+  }
+
+  h1 {
+    margin-bottom: var(--space-5);
+    font-size: clamp(2.4rem, 11vw, 4.8rem);
+    font-weight: 900;
+    letter-spacing: -0.075em;
+    line-height: 0.95;
+  }
+
+  .group-hero p:not(.eyebrow) {
+    color: var(--color-text-muted);
+    font-size: 1.05rem;
+    line-height: 1.75;
+  }
+
+  .group-section {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-xs);
+    margin-top: var(--space-6);
+    padding: var(--space-5);
+  }
+
+  .section-heading {
+    margin-bottom: var(--space-5);
+  }
+
+  .section-heading h2 {
+    font-size: clamp(1.65rem, 7vw, 2.6rem);
+    font-weight: 900;
+    letter-spacing: -0.055em;
+    line-height: 1.05;
+    margin-bottom: 0;
+  }
+
+  .group-matches {
+    display: grid;
+    gap: var(--space-3);
+  }
+</style>

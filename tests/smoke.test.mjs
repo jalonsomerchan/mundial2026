@@ -48,6 +48,8 @@ describe('project smoke checks', () => {
       'src/pages/[locale]/index.astro',
       'src/pages/calendario/index.astro',
       'src/pages/en/calendar/index.astro',
+      'src/pages/grupos/[group].astro',
+      'src/pages/en/groups/[group].astro',
       'src/pages/404.astro',
       'src/pages/manifest.webmanifest.ts',
       'src/pages/robots.txt.ts',
@@ -59,6 +61,7 @@ describe('project smoke checks', () => {
       'src/i18n/translations',
       'src/styles/global.css',
       'src/utils/calendar.ts',
+      'src/utils/groups.ts',
       'src/utils/matches.ts',
     ].forEach((path) => {
       assert.equal(existsSync(join(root, path)), true, `${path} should exist`);
@@ -84,7 +87,7 @@ describe('project smoke checks', () => {
   });
 
   it('keeps basic template components available', () => {
-    ['Button', 'CalendarMatchRow', 'Container', 'Footer', 'Header', 'LocalMatchTimeScript', 'MatchCalendar', 'MatchCard', 'WorldCupExplorer'].forEach((component) => {
+    ['Button', 'CalendarMatchRow', 'Container', 'Footer', 'GroupPage', 'GroupStandingsTable', 'Header', 'LocalMatchTimeScript', 'MatchCalendar', 'MatchCard', 'WorldCupExplorer'].forEach((component) => {
       assert.equal(
         existsSync(join(root, `src/components/${component}.astro`)),
         true,
@@ -144,7 +147,9 @@ describe('project smoke checks', () => {
       assert.ok(translations['home.localTime'], `${locale}.json should include home.localTime`);
       assert.ok(translations['home.countdownPending'], `${locale}.json should include home.countdownPending`);
       assert.ok(translations['calendar.title'], `${locale}.json should include calendar.title`);
+      assert.ok(translations['group.standingsTitle'], `${locale}.json should include group.standingsTitle`);
       assert.ok(translations['routes.calendar'], `${locale}.json should include routes.calendar`);
+      assert.ok(translations['routes.groups'], `${locale}.json should include routes.groups`);
     });
   });
 
@@ -211,6 +216,24 @@ describe('project smoke checks', () => {
     assert.match(spanishPage, /MatchCalendar/);
     assert.match(englishPage, /MatchCalendar/);
     assert.match(header, /nav\.calendar/);
+  });
+
+  it('keeps group pages with standings and matches wired', () => {
+    const groupPage = readText('src/components/GroupPage.astro');
+    const standingsTable = readText('src/components/GroupStandingsTable.astro');
+    const groupsUtils = readText('src/utils/groups.ts');
+    const spanishPage = readText('src/pages/grupos/[group].astro');
+    const englishPage = readText('src/pages/en/groups/[group].astro');
+    const explorer = readText('src/components/WorldCupExplorer.astro');
+
+    assert.match(groupPage, /GroupStandingsTable/);
+    assert.match(groupPage, /CalendarMatchRow/);
+    assert.match(standingsTable, /standings-table/);
+    assert.match(groupsUtils, /getGroupStandings/);
+    assert.match(groupsUtils, /getGroupPath/);
+    assert.match(spanishPage, /getStaticPaths/);
+    assert.match(englishPage, /getStaticPaths/);
+    assert.match(explorer, /getGroupPath/);
   });
 
   it('keeps custom domain GitHub Pages settings', () => {

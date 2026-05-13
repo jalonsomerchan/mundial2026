@@ -51,6 +51,7 @@ describe('project smoke checks', () => {
       'src/pages/robots.txt.ts',
       'src/layouts/BaseLayout.astro',
       'src/config/site.ts',
+      'src/data/worldcup2026.ts',
       'src/i18n/ui.ts',
       'src/i18n/translations',
       'src/styles/global.css',
@@ -78,7 +79,7 @@ describe('project smoke checks', () => {
   });
 
   it('keeps basic template components available', () => {
-    ['Button', 'Container', 'Footer', 'Header'].forEach((component) => {
+    ['Button', 'Container', 'Footer', 'Header', 'WorldCupExplorer'].forEach((component) => {
       assert.equal(
         existsSync(join(root, `src/components/${component}.astro`)),
         true,
@@ -135,6 +136,19 @@ describe('project smoke checks', () => {
       );
       assert.ok(translations['home.title'], `${locale}.json should include home.title`);
     });
+  });
+
+  it('keeps the World Cup data source and homepage wired', () => {
+    const dataHelper = readText('src/data/worldcup2026.ts');
+    const explorer = readText('src/components/WorldCupExplorer.astro');
+    const home = readText('src/pages/index.astro');
+
+    assert.match(dataHelper, /openfootball\/worldcup\.json/);
+    assert.match(dataHelper, /fallbackData/);
+    assert.match(explorer, /hero-shell/);
+    assert.match(explorer, /match-grid/);
+    assert.match(home, /WorldCupExplorer/);
+    assert.match(home, /getWorldCupSummary/);
   });
 
   it('includes GitHub workflows for CI and Pages', () => {

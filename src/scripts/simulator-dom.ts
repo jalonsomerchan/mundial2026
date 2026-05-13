@@ -1,7 +1,6 @@
 import {
   buildContext,
   getChampion,
-  getGroupStandings,
   getPickedWinner,
   getRealWinner,
   getTeams,
@@ -23,7 +22,7 @@ const storageKey = 'worldcup-2026-simulator-v1';
 const payloadElement = document.getElementById('worldcup-simulator-data');
 const payload = JSON.parse(payloadElement?.textContent || '{}') as SimulatorPayload;
 const matches = payload.matches ?? [];
-const labels = payload.labels ?? {} as SimulatorLabels;
+const labels = (payload.labels ?? {}) as SimulatorLabels;
 const board = document.querySelector<HTMLElement>('[data-simulator-board]');
 const championNode = document.querySelector<HTMLElement>('[data-simulator-champion]');
 const resetButton = document.querySelector<HTMLButtonElement>('[data-reset-simulator]');
@@ -259,6 +258,11 @@ function refreshBoard(context = buildContext(matches, picks)) {
   matches.forEach((match) => refreshMatch(match, context));
 }
 
+function reloadStoredPicks() {
+  picks = readPicks();
+  refreshBoard();
+}
+
 function dispatchUpdate() {
   document.dispatchEvent(new CustomEvent('simulator:picks-updated'));
 }
@@ -287,6 +291,8 @@ resetButton?.addEventListener('click', () => {
   refreshBoard();
   dispatchUpdate();
 });
+
+document.addEventListener('simulator:picks-loaded', reloadStoredPicks);
 
 window.worldCupSimulator = {
   clear() {

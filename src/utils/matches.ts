@@ -1,4 +1,8 @@
+import type { Locale } from '../config/site';
 import type { WorldCupMatch } from '../data/worldcup2026';
+import { getCountryName } from '../i18n/countries';
+import { getLocalizedPath, translate } from '../i18n/ui';
+import { normalizeSlug } from './slugs';
 
 export function getMatchUtcIso(match: Pick<WorldCupMatch, 'date' | 'time'>) {
   const timeMatch = match.time.match(/^(\d{1,2}):(\d{2})\s+UTC([+-]\d{1,2})$/);
@@ -21,4 +25,19 @@ export function getMatchResult(match: WorldCupMatch) {
   }
 
   return '-';
+}
+
+export function getMatchSlug(match: WorldCupMatch, locale: Locale) {
+  const matchNumber = match.num ? `partido-${match.num}` : normalizeSlug(`${match.date}-${match.team1}-${match.team2}`);
+  const teams = normalizeSlug(`${getCountryName(match.team1, locale)}-${getCountryName(match.team2, locale)}`);
+
+  return `${matchNumber}-${teams}`;
+}
+
+export function getMatchPath(match: WorldCupMatch, locale: Locale) {
+  return getLocalizedPath(`${translate(locale, 'routes.matches')}/${getMatchSlug(match, locale)}`, locale);
+}
+
+export function findMatchBySlug(matches: WorldCupMatch[], slug: string, locale: Locale) {
+  return matches.find((match) => getMatchSlug(match, locale) === slug);
 }

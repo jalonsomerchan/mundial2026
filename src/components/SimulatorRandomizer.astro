@@ -4,12 +4,13 @@ interface Props {
   shareLabel: string;
   clearLabel: string;
   copiedLabel: string;
+  actionsLabel?: string;
 }
 
-const { randomizeLabel, shareLabel, clearLabel, copiedLabel } = Astro.props;
+const { randomizeLabel, shareLabel, clearLabel, copiedLabel, actionsLabel = 'Simulator actions' } = Astro.props;
 ---
 
-<div class="simulator-randomizer" data-simulator-actions>
+<div class="simulator-randomizer" data-simulator-actions role="group" aria-label={actionsLabel}>
   <button class="random-button" type="button" data-randomize-simulator>{randomizeLabel}</button>
   <button class="share-button" type="button" data-share-simulator>{shareLabel}</button>
   <button class="clear-button" type="button" data-clear-simulator>{clearLabel}</button>

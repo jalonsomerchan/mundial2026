@@ -12,7 +12,7 @@ const { locale, venue } = Astro.props;
 const className = Astro.props.class ?? '';
 ---
 
-<a class={`venue-link ${className}`} href={getVenuePath(venue, locale)}>{venue}</a>
+<a class={`venue-link ${className}`} href={getVenuePath(venue, locale)} aria-label={venue}>{venue}</a>
 
 <style>
   .venue-link {

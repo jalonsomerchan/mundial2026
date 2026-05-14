@@ -11,8 +11,25 @@ const { locale } = Astro.props;
 const t = useTranslations(locale);
 ---
 
-<footer class="border-t border-[var(--color-border)]">
-  <Container class="py-6 text-sm text-[var(--color-muted)]">
+<footer class="site-footer" aria-label={t('a11y.footerNavigation')}>
+  <Container class="site-footer__inner">
     <p>© {new Date().getFullYear()} {siteConfig.name}. {t('footer.createdWith')}</p>
   </Container>
 </footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .site-footer__inner {
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    padding-bottom: var(--space-6);
+    padding-top: var(--space-6);
+  }
+
+  p {
+    margin: 0;
+  }
+</style>

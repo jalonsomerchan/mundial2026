@@ -52,8 +52,9 @@ const ogLocale = locale === 'es' ? 'es_ES' : 'en_US';
     <meta name="twitter:image" content={imageUrl} />
   </head>
   <body>
+    <a class="skip-link" href="#main-content">{t('a11y.skipToContent')}</a>
     <Header locale={locale} />
-    <main>
+    <main id="main-content" tabindex="-1" aria-label={t('a11y.mainContent')}>
       <slot />
     </main>
     <Footer locale={locale} />

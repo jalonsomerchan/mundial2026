@@ -39,15 +39,15 @@ function formatDay(date: string) {
 
   <div class="calendar-list">
     {days.map((day) => (
-      <section id={`day-${day.date}`} class="day-section" aria-labelledby={`heading-${day.date}`}>
+      <section id={`day-${day.date}`} class="day-section" aria-labelledby={`heading-${day.date}`} tabindex="-1">
         <header class="day-heading">
           <div>
             <p class="eyebrow">{t('calendar.dayLabel')}</p>
             <h2 id={`heading-${day.date}`}>{formatDay(day.date)}</h2>
           </div>
-          <span>{day.matches.length} {day.matches.length === 1 ? t('calendar.matchSingular') : t('calendar.matchPlural')}</span>
+          <span aria-label={`${day.matches.length} ${day.matches.length === 1 ? t('calendar.matchSingular') : t('calendar.matchPlural')}`}>{day.matches.length} {day.matches.length === 1 ? t('calendar.matchSingular') : t('calendar.matchPlural')}</span>
         </header>
-        <div class="day-matches">
+        <div class="day-matches" role="list" aria-label={t('a11y.calendarMatchesForDay')}>
           {day.matches.map((match) => <CalendarMatchRow locale={locale} match={match} />)}
         </div>
       </section>
@@ -101,7 +101,7 @@ function formatDay(date: string) {
     gap: var(--space-2);
     margin: 0 0 var(--space-8);
     overflow-x: auto;
-    padding-bottom: var(--space-2);
+    padding: var(--space-1) 0 var(--space-2);
     scroll-snap-type: x proximity;
   }
 
@@ -113,6 +113,7 @@ function formatDay(date: string) {
     flex: 0 0 auto;
     font-size: 0.86rem;
     font-weight: 800;
+    min-height: 2.5rem;
     padding: 0.55rem 0.85rem;
     scroll-snap-align: start;
     text-decoration: none;
@@ -134,6 +135,11 @@ function formatDay(date: string) {
     border-radius: var(--radius-2xl);
     box-shadow: var(--shadow-xs);
     padding: var(--space-5);
+  }
+
+  .day-section:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--color-primary), transparent 25%);
+    outline-offset: 3px;
   }
 
   .day-heading {

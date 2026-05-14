@@ -53,29 +53,30 @@ const simulatorData = {
     unresolvedTeam: t('simulator.unresolvedTeam'),
     groupStage: t('simulator.groupStage'),
     knockoutStage: t('simulator.knockoutStage'),
+    pickWinnerForMatch: t('a11y.pickWinnerForMatch'),
   },
   matches: simulatorMatches,
 };
 ---
 
-<section class="simulator-shell">
+<section class="simulator-shell" aria-labelledby="simulator-title">
   <header class="simulator-hero">
     <div class="hero-content">
       <p class="eyebrow">{t('simulator.eyebrow')}</p>
-      <h1>{t('simulator.title')}</h1>
+      <h1 id="simulator-title">{t('simulator.title')}</h1>
       <p>{t('simulator.description')}</p>
       <button class="reset-button" type="button" data-reset-simulator>{t('simulator.reset')}</button>
     </div>
   </header>
 
-  <aside class="champion-card" aria-live="polite">
+  <aside class="champion-card" aria-live="polite" aria-labelledby="simulator-champion-label">
     <div>
-      <span>{t('simulator.champion')}</span>
+      <span id="simulator-champion-label">{t('simulator.champion')}</span>
       <strong data-simulator-champion>{t('simulator.noChampion')}</strong>
     </div>
   </aside>
 
-  <div class="simulator-board" data-simulator-board></div>
+  <div class="simulator-board" data-simulator-board role="region" aria-label={t('a11y.simulatorBoard')}></div>
 </section>
 
 <script type="application/json" id="worldcup-simulator-data" set:html={JSON.stringify(simulatorData)}></script>

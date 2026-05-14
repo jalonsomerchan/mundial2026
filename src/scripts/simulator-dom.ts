@@ -73,6 +73,11 @@ function setTeam(node: HTMLElement, team: SimulatorTeam | null) {
   node.append(name);
 }
 
+function getMatchLabel(match: SimulatorMatch, context: SimulatorContext) {
+  const [team1, team2] = getTeams(match, context);
+  return `${team1?.label ?? labels.unresolvedTeam} vs ${team2?.label ?? labels.unresolvedTeam}`;
+}
+
 function createMatchCard(match: SimulatorMatch) {
   const card = el('article', 'sim-match');
   card.dataset.matchId = match.id;
@@ -109,8 +114,11 @@ function createRoundSection(title: string, subtitle: string, roundMatches: Simul
   const heading = document.createElement('h2');
   const count = document.createElement('span');
   const grid = el('div', 'sim-round-grid');
+  const headingId = `sim-round-${roundMatches[0]?.id ?? title}`;
 
+  section.setAttribute('aria-labelledby', headingId);
   eyebrow.textContent = subtitle;
+  heading.id = headingId;
   heading.textContent = title;
   count.textContent = String(roundMatches.length);
   copy.append(eyebrow, heading);
@@ -130,7 +138,9 @@ function createStandingsSection(context: SimulatorContext) {
   const count = document.createElement('span');
   const grid = el('div', 'sim-groups-grid');
 
+  section.setAttribute('aria-labelledby', 'sim-standings-title');
   eyebrow.textContent = labels.pickWinner;
+  heading.id = 'sim-standings-title';
   heading.textContent = labels.groupStage;
   count.textContent = String(context.groupStandings.size);
   copy.append(eyebrow, heading);
@@ -232,9 +242,11 @@ function refreshMatch(match: SimulatorMatch, context: SimulatorContext) {
   const winner = realWinner ?? pickedWinner;
   const canPick = Boolean(team1 && team2 && !realWinner);
   const statusClass = realWinner ? 'status-real' : pickedWinner ? 'status-simulated' : 'status-pending';
+  const matchLabel = getMatchLabel(match, context);
 
   card.classList.toggle('is-decided', Boolean(winner));
   card.classList.toggle('is-locked', Boolean(realWinner));
+  card.setAttribute('aria-label', matchLabel);
 
   if (status) {
     status.className = `sim-status ${statusClass}`;
@@ -247,6 +259,11 @@ function refreshMatch(match: SimulatorMatch, context: SimulatorContext) {
 
     button.dataset.team = team?.raw ?? '';
     button.disabled = !canPick;
+    button.setAttribute('aria-pressed', winner?.raw === team?.raw ? 'true' : 'false');
+    button.setAttribute(
+      'aria-label',
+      team ? labels.pickWinnerForMatch.replace('{team}', team.label).replace('{match}', matchLabel) : labels.unresolvedTeam
+    );
     button.classList.toggle('is-selected', winner?.raw === team?.raw);
     setTeam(button, team);
   });

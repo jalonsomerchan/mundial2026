@@ -27,6 +27,7 @@ export interface SimulatorLabels {
   unresolvedTeam: string;
   groupStage: string;
   knockoutStage: string;
+  pickWinnerForMatch: string;
 }
 
 export type SimulatorPicks = Record<string, string>;

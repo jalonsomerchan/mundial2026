@@ -18,7 +18,7 @@ const teamUrl = isKnownCountry(team) ? getTeamPath(team, locale) : null;
 ---
 
 {teamUrl ? (
-  <a class={`team-link ${className}`} href={teamUrl}>
+  <a class={`team-link ${className}`} href={teamUrl} aria-label={teamLabel}>
     {flagUrl && <img src={flagUrl} width={flagSize} height={flagSize} alt="" loading="lazy" decoding="async" />}
     <span>{teamLabel}</span>
   </a>

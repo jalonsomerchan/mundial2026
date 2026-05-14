@@ -14,11 +14,6 @@ const calendarUrl = getLocalizedRoutePath('routes.calendar', locale);
 const simulatorUrl = getLocalizedRoutePath('routes.simulator', locale);
 const alternateLocales = getAlternateLocales(locale);
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
-const navItems = [
-  { href: homeUrl, label: t('nav.home') },
-  { href: calendarUrl, label: t('nav.calendar') },
-  { href: simulatorUrl, label: t('nav.simulator') },
-];
 
 function isCurrentPath(href: string) {
   const normalizedHref = href.replace(/\/$/, '') || '/';
@@ -26,45 +21,24 @@ function isCurrentPath(href: string) {
 }
 ---
 
-<header class="site-header">
-  <Container class="site-header__inner">
-    <a class="site-brand" href={homeUrl} aria-label={siteConfig.name + ': ' + t('nav.home')}>
-      {siteConfig.name}
-    </a>
-
-    <nav aria-label={t('a11y.primaryNavigation')} class="site-nav">
-      {navItems.map((item) => (
-        <a class="site-nav__link" href={item.href} aria-current={isCurrentPath(item.href) ? 'page' : undefined}>
-          {item.label}
+<header class="border-b border-[var(--color-border)] bg-[var(--color-surface)]/85 backdrop-blur">
+  <Container class="flex items-center justify-between gap-4 py-4">
+    <a class="font-black tracking-tight text-[var(--color-text)]" href={homeUrl} aria-label={siteConfig.name + ': ' + t('nav.home')}>{siteConfig.name}</a>
+    <nav aria-label={t('a11y.primaryNavigation')} class="flex items-center gap-3 text-sm text-[var(--color-text-muted)]">
+      <a class="font-semibold hover:text-[var(--color-text)]" href={homeUrl} aria-current={isCurrentPath(homeUrl) ? 'page' : undefined}>{t('nav.home')}</a>
+      <a class="font-semibold hover:text-[var(--color-text)]" href={calendarUrl} aria-current={isCurrentPath(calendarUrl) ? 'page' : undefined}>{t('nav.calendar')}</a>
+      <a class="font-semibold hover:text-[var(--color-text)]" href={simulatorUrl} aria-current={isCurrentPath(simulatorUrl) ? 'page' : undefined}>{t('nav.simulator')}</a>
+      {alternateLocales.map((alternateLocale) => (
+        <a
+          class="rounded-full border border-[var(--color-border)] px-3 py-1 text-xs font-bold hover:text-[var(--color-text)]"
+          href={getLocalizedPath('/', alternateLocale)}
+          hreflang={alternateLocale}
+          lang={alternateLocale}
+          aria-label={t('a11y.changeLanguage') + ': ' + localeLabels[alternateLocale]}
+        >
+          {localeLabels[alternateLocale]}
         </a>
       ))}
     </nav>
-
-    {alternateLocales.length > 0 && (
-      <nav aria-label={t('a11y.languageNavigation')} class="locale-nav">
-        {alternateLocales.map((alternateLocale) => (
-          <a
-            class="locale-nav__link"
-            href={getLocalizedPath('/', alternateLocale)}
-            hreflang={alternateLocale}
-            lang={alternateLocale}
-            aria-label={t('a11y.changeLanguage') + ': ' + localeLabels[alternateLocale]}
-          >
-            {localeLabels[alternateLocale]}
-          </a>
-        ))}
-      </nav>
-    )}
   </Container>
 </header>
-
-<style>
-  .site-header { background: color-mix(in srgb, var(--color-surface), transparent 15%); border-bottom: 1px solid var(--color-border); backdrop-filter: blur(12px); }
-  .site-header__inner { align-items: center; display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: space-between; padding-bottom: var(--space-4); padding-top: var(--space-4); }
-  .site-brand { color: var(--color-text); font-weight: 900; letter-spacing: -0.04em; text-decoration: none; }
-  .site-nav, .locale-nav { align-items: center; display: flex; flex-wrap: wrap; gap: var(--space-2); }
-  .site-nav__link, .locale-nav__link { border-radius: var(--radius-full); color: var(--color-text-muted); font-size: 0.9rem; font-weight: 750; min-height: 2.25rem; padding: 0.45rem 0.7rem; text-decoration: none; }
-  .site-nav__link:hover, .locale-nav__link:hover, .site-nav__link[aria-current='page'] { color: var(--color-text); }
-  .site-nav__link[aria-current='page'] { background: var(--color-primary-soft); color: var(--color-primary); }
-  .locale-nav__link { border: 1px solid var(--color-border); font-size: 0.78rem; font-weight: 850; }
-</style>

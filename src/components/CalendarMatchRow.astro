@@ -17,28 +17,30 @@ const t = useTranslations(locale);
 const matchIso = getMatchUtcIso(match);
 const result = getMatchResult(match);
 const matchUrl = getMatchPath(match, locale);
+const matchLabel = `${getTeamLabel(match.team1)} ${result} ${getTeamLabel(match.team2)}`;
+const detailLabel = t('a11y.openMatchDetails').replaceAll('{match}', matchLabel);
 
 function getTeamLabel(team: string) {
   return getCountryName(team, locale);
 }
 ---
 
-<article class="calendar-match-row">
+<article class="calendar-match-row" role="listitem" aria-label={matchLabel}>
   <div class="match-time">
     <time class="js-local-time" datetime={matchIso}>{match.time}</time>
     <span class="match-countdown js-match-countdown" data-match-time={matchIso}>{t('home.countdownPending')}</span>
   </div>
 
-  <div class="match-teams" aria-label={`${getTeamLabel(match.team1)} ${result} ${getTeamLabel(match.team2)}`}>
+  <div class="match-teams" aria-label={matchLabel}>
     <strong class="team-name"><TeamLink locale={locale} team={match.team1} /></strong>
-    <span class="score">{result}</span>
+    <span class="score" aria-label={`${t('home.result')}: ${result}`}>{result}</span>
     <strong class="team-name team-name-away"><TeamLink locale={locale} team={match.team2} /></strong>
   </div>
 
-  <div class="match-meta">
+  <div class="match-meta" aria-label={t('a11y.matchDetails')}>
     <span>{match.group ?? match.round}</span>
     <VenueLink locale={locale} venue={match.ground} />
-    <a class="match-detail-link" href={matchUrl}>{t('match.viewDetails')}</a>
+    <a class="match-detail-link" href={matchUrl} aria-label={detailLabel}>{t('match.viewDetails')}</a>
   </div>
 </article>
 
@@ -134,6 +136,7 @@ function getTeamLabel(team: string) {
 
   .match-detail-link {
     border: 1px solid var(--color-border);
+    min-height: 2.25rem;
   }
 
   @media (max-width: 520px) {

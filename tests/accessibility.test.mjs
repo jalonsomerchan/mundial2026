@@ -28,15 +28,23 @@ describe('base accessibility checks', () => {
     assert.match(styles, /:focus-visible/);
   });
 
-  it('labels header, language and footer landmarks', () => {
+  it('keeps header visual classes while adding accessible labels', () => {
     const header = readText('src/components/Header.astro');
-    const footer = readText('src/components/Footer.astro');
 
+    assert.match(header, /border-b border-\[var\(--color-border\)\]/);
     assert.match(header, /aria-label=\{t\('a11y\.primaryNavigation'\)\}/);
-    assert.match(header, /aria-label=\{t\('a11y\.languageNavigation'\)\}/);
     assert.match(header, /aria-current/);
     assert.match(header, /hreflang/);
-    assert.match(footer, /aria-label=\{t\('a11y\.footerNavigation'\)\}/);
+    assert.match(header, /a11y\.changeLanguage/);
+  });
+
+  it('does not force footer or venue visual markup changes', () => {
+    const footer = readText('src/components/Footer.astro');
+    const venue = readText('src/components/VenueLink.astro');
+
+    assert.match(footer, /<footer class="site-footer">/);
+    assert.doesNotMatch(footer, /a11y\.footerNavigation/);
+    assert.match(venue, /<a class=\{`venue-link \$\{className\}`\} href=\{getVenuePath\(venue, locale\)\}>\{venue\}<\/a>/);
   });
 
   it('labels calendar rows and match detail links', () => {
@@ -75,9 +83,7 @@ describe('base accessibility checks', () => {
         'a11y.skipToContent',
         'a11y.mainContent',
         'a11y.primaryNavigation',
-        'a11y.languageNavigation',
         'a11y.changeLanguage',
-        'a11y.footerNavigation',
         'a11y.calendarMatchesForDay',
         'a11y.openMatchDetails',
         'a11y.simulatorBoard',

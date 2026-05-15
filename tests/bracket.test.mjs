@@ -19,6 +19,7 @@ describe('localized bracket page', () => {
       'src/pages/cuadro/index.astro',
       'src/pages/en/bracket/index.astro',
       'src/components/WorldCupBracket.astro',
+      'src/components/BracketBoard.astro',
       'src/components/BracketRoundSection.astro',
       'src/components/BracketMatchCard.astro',
       'src/components/BracketTeam.astro',
@@ -38,21 +39,31 @@ describe('localized bracket page', () => {
     assert.match(bracketUtils, /getTeams/);
     assert.match(bracketUtils, /getKnockoutMatches/);
     assert.match(bracketUtils, /getBracketRounds/);
+    assert.match(bracketUtils, /Ronda de 32/);
     assert.match(simulatorUtils, /getSimulatorMatches/);
     assert.match(simulator, /getSimulatorMatches/);
   });
 
   it('renders accessible bracket rounds, match cards and team links', () => {
     const page = readText('src/components/WorldCupBracket.astro');
+    const board = readText('src/components/BracketBoard.astro');
     const round = readText('src/components/BracketRoundSection.astro');
     const card = readText('src/components/BracketMatchCard.astro');
     const team = readText('src/components/BracketTeam.astro');
 
     assert.match(page, /Breadcrumbs/);
     assert.match(page, /ContextualLinks/);
+    assert.match(page, /BracketBoard/);
+    assert.match(page, /accessibleListTitle/);
     assert.match(page, /round-nav/);
+    assert.match(board, /data-bracket-viewport/);
+    assert.match(board, /data-bracket-stage/);
+    assert.match(board, /data-bracket-zoom-in/);
+    assert.match(board, /pointerdown/);
+    assert.match(board, /touch-action:\s*none/);
     assert.match(round, /aria-labelledby/);
     assert.match(round, /role="list"/);
+    assert.match(card, /compact\?: boolean/);
     assert.match(card, /aria-labelledby/);
     assert.match(card, /getMatchPath/);
     assert.match(card, /VenueLink/);
@@ -69,6 +80,9 @@ describe('localized bracket page', () => {
       assert.ok(translations['bracket.metaDescription'], `${locale} should include bracket.metaDescription`);
       assert.ok(translations['bracket.title'], `${locale} should include bracket.title`);
       assert.ok(translations['bracket.roundNavigation'], `${locale} should include bracket.roundNavigation`);
+      assert.ok(translations['bracket.boardTitle'], `${locale} should include bracket.boardTitle`);
+      assert.ok(translations['bracket.zoomIn'], `${locale} should include bracket.zoomIn`);
+      assert.ok(translations['bracket.accessibleListTitle'], `${locale} should include bracket.accessibleListTitle`);
     });
   });
 

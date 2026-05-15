@@ -1,10 +1,13 @@
 ---
+import Breadcrumbs from './Breadcrumbs.astro';
 import CalendarMatchRow from './CalendarMatchRow.astro';
+import ContextualLinks from './ContextualLinks.astro';
 import LocalMatchTimeScript from './LocalMatchTimeScript.astro';
 import type { Locale } from '../config/site';
 import type { TeamSummary } from '../utils/teams';
 import { getCountryFlagUrl, getCountryName } from '../i18n/countries';
-import { useTranslations } from '../i18n/ui';
+import { getLocalizedPath, getLocalizedRoutePath, useTranslations } from '../i18n/ui';
+import { getGroupPath } from '../utils/groups';
 
 interface Props {
   locale: Locale;
@@ -16,9 +19,25 @@ const t = useTranslations(locale);
 const teamLabel = getCountryName(team.name, locale);
 const flagUrl = getCountryFlagUrl(team.name);
 const firstGroup = team.groups[0] ?? t('team.noGroup');
+const homeUrl = getLocalizedPath('/', locale);
+const calendarUrl = getLocalizedRoutePath('routes.calendar', locale);
+const groupLinks = team.groups.map((group) => ({
+  label: group,
+  href: getGroupPath(group, locale),
+  description: t('group.metaDescription'),
+}));
 ---
 
 <article class="team-page">
+  <Breadcrumbs
+    locale={locale}
+    items={[
+      { label: t('nav.home'), href: homeUrl },
+      { label: t('home.teamsTitle'), href: homeUrl },
+      { label: teamLabel },
+    ]}
+  />
+
   <header class="team-hero">
     <p class="eyebrow">{t('team.eyebrow')}</p>
     <div class="team-title-row">
@@ -51,6 +70,14 @@ const firstGroup = team.groups[0] ?? t('team.noGroup');
       {team.matches.map((match) => <CalendarMatchRow locale={locale} match={match} />)}
     </div>
   </section>
+
+  <ContextualLinks
+    title={t('home.detailsTitle')}
+    links={[
+      { label: t('nav.calendar'), href: calendarUrl, description: t('calendar.metaDescription') },
+      ...groupLinks,
+    ]}
+  />
 </article>
 
 <LocalMatchTimeScript />

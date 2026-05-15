@@ -1,0 +1,17 @@
+---
+import Container from '../../../components/Container.astro';
+import WorldCupBracket from '../../../components/WorldCupBracket.astro';
+import { getWorldCupSummary } from '../../../data/worldcup2026';
+import { useTranslations } from '../../../i18n/ui';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+const locale = 'en';
+const t = useTranslations(locale);
+const summary = await getWorldCupSummary();
+---
+
+<BaseLayout title={t('bracket.metaTitle')} description={t('bracket.metaDescription')} locale={locale}>
+  <Container>
+    <WorldCupBracket locale={locale} summary={summary} />
+  </Container>
+</BaseLayout>

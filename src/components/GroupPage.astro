@@ -1,11 +1,14 @@
 ---
+import Breadcrumbs from './Breadcrumbs.astro';
 import CalendarMatchRow from './CalendarMatchRow.astro';
+import ContextualLinks from './ContextualLinks.astro';
 import GroupStandingsTable from './GroupStandingsTable.astro';
 import LocalMatchTimeScript from './LocalMatchTimeScript.astro';
 import type { Locale } from '../config/site';
 import type { WorldCupGroup } from '../data/worldcup2026';
-import { useTranslations } from '../i18n/ui';
+import { getLocalizedPath, getLocalizedRoutePath, useTranslations } from '../i18n/ui';
 import { getGroupStandings } from '../utils/groups';
+import { getTeamPath } from '../utils/teams';
 
 interface Props {
   locale: Locale;
@@ -15,9 +18,25 @@ interface Props {
 const { locale, group } = Astro.props;
 const t = useTranslations(locale);
 const standings = getGroupStandings(group);
+const homeUrl = getLocalizedPath('/', locale);
+const calendarUrl = getLocalizedRoutePath('routes.calendar', locale);
+const teamLinks = group.teams.slice(0, 4).map((team) => ({
+  label: team,
+  href: getTeamPath(team, locale),
+  description: t('team.metaDescription'),
+}));
 ---
 
 <article class="group-page">
+  <Breadcrumbs
+    locale={locale}
+    items={[
+      { label: t('nav.home'), href: homeUrl },
+      { label: t('home.teamsTitle'), href: homeUrl },
+      { label: `${t('group.titlePrefix')} ${group.name}` },
+    ]}
+  />
+
   <header class="group-hero">
     <p class="eyebrow">{t('group.eyebrow')}</p>
     <h1>{t('group.titlePrefix')} {group.name}</h1>
@@ -41,6 +60,14 @@ const standings = getGroupStandings(group);
       {group.matches.map((match) => <CalendarMatchRow locale={locale} match={match} />)}
     </div>
   </section>
+
+  <ContextualLinks
+    title={t('home.detailsTitle')}
+    links={[
+      { label: t('nav.calendar'), href: calendarUrl, description: t('calendar.metaDescription') },
+      ...teamLinks,
+    ]}
+  />
 </article>
 
 <LocalMatchTimeScript />

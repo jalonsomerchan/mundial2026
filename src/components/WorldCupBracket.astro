@@ -1,0 +1,130 @@
+---
+import Breadcrumbs from './Breadcrumbs.astro';
+import BracketRoundSection from './BracketRoundSection.astro';
+import ContextualLinks from './ContextualLinks.astro';
+import LocalMatchTimeScript from './LocalMatchTimeScript.astro';
+import type { Locale } from '../config/site';
+import type { WorldCupSummary } from '../data/worldcup2026';
+import { getLocalizedPath, getLocalizedRoutePath, useTranslations } from '../i18n/ui';
+import { getBracketRounds } from '../utils/bracket';
+import { getSimulatorMatches } from '../utils/simulator';
+
+interface Props {
+  locale: Locale;
+  summary: WorldCupSummary;
+}
+
+const { locale, summary } = Astro.props;
+const t = useTranslations(locale);
+const homeUrl = getLocalizedPath('/', locale);
+const calendarUrl = getLocalizedRoutePath('routes.calendar', locale);
+const simulatorUrl = getLocalizedRoutePath('routes.simulator', locale);
+const bracketUrl = getLocalizedRoutePath('routes.bracket', locale);
+const rounds = getBracketRounds(summary.matches, getSimulatorMatches(summary.matches, locale), locale);
+---
+
+<article class="bracket-page">
+  <Breadcrumbs
+    locale={locale}
+    items={[
+      { label: t('nav.home'), href: homeUrl },
+      { label: t('nav.bracket'), href: bracketUrl },
+    ]}
+  />
+
+  <header class="bracket-hero">
+    <p class="eyebrow">{t('bracket.eyebrow')}</p>
+    <h1>{t('bracket.title')}</h1>
+    <p>{t('bracket.description')}</p>
+  </header>
+
+  <nav class="round-nav" aria-label={t('bracket.roundNavigation')}>
+    {rounds.map((round) => <a href={`#${round.id}`}>{round.name}</a>)}
+  </nav>
+
+  <div class="bracket-rounds">
+    {rounds.map((round) => <BracketRoundSection locale={locale} round={round} />)}
+  </div>
+
+  <ContextualLinks
+    title={t('home.detailsTitle')}
+    links={[
+      { label: t('nav.calendar'), href: calendarUrl, description: t('calendar.metaDescription') },
+      { label: t('nav.simulator'), href: simulatorUrl, description: t('simulator.metaDescription') },
+    ]}
+  />
+</article>
+
+<LocalMatchTimeScript />
+
+<style>
+  .bracket-page {
+    padding: var(--space-16) 0;
+  }
+
+  .bracket-hero {
+    max-width: 52rem;
+    margin-bottom: var(--space-8);
+  }
+
+  .eyebrow {
+    color: var(--color-primary);
+    font-size: 0.78rem;
+    font-weight: 850;
+    letter-spacing: 0.16em;
+    margin: 0 0 var(--space-3);
+    text-transform: uppercase;
+  }
+
+  h1,
+  p {
+    margin-top: 0;
+  }
+
+  h1 {
+    font-size: clamp(2.4rem, 11vw, 4.9rem);
+    font-weight: 400;
+    letter-spacing: -0.075em;
+    line-height: 0.95;
+    margin-bottom: var(--space-5);
+  }
+
+  .bracket-hero p:not(.eyebrow) {
+    color: var(--color-text-muted);
+    font-size: 1.05rem;
+    line-height: 1.75;
+  }
+
+  .round-nav {
+    display: flex;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-8);
+    overflow-x: auto;
+    padding: var(--space-1) 0 var(--space-2);
+    scroll-snap-type: x proximity;
+  }
+
+  .round-nav a {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    color: var(--color-text-muted);
+    flex: 0 0 auto;
+    font-size: 0.86rem;
+    font-weight: 850;
+    min-height: 2.5rem;
+    padding: 0.55rem 0.85rem;
+    scroll-snap-align: start;
+    text-decoration: none;
+  }
+
+  .round-nav a:hover {
+    border-color: var(--color-border-strong);
+    color: var(--color-primary);
+  }
+
+  .bracket-rounds {
+    display: grid;
+    gap: var(--space-6);
+  }
+</style>

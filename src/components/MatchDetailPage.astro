@@ -1,13 +1,17 @@
 ---
+import Breadcrumbs from './Breadcrumbs.astro';
+import ContextualLinks from './ContextualLinks.astro';
 import MatchScoreboard from './MatchScoreboard.astro';
 import VenueLink from './VenueLink.astro';
 import LocalMatchTimeScript from './LocalMatchTimeScript.astro';
 import type { Locale } from '../config/site';
 import type { WorldCupMatch } from '../data/worldcup2026';
 import { getCountryName } from '../i18n/countries';
-import { getLocalizedRoutePath, useTranslations } from '../i18n/ui';
+import { getLocalizedPath, getLocalizedRoutePath, useTranslations } from '../i18n/ui';
 import { getGroupPath } from '../utils/groups';
 import { getMatchResult, getMatchUtcIso } from '../utils/matches';
+import { getTeamPath } from '../utils/teams';
+import { getVenuePath } from '../utils/venues';
 
 interface Props {
   locale: Locale;
@@ -22,9 +26,19 @@ const team1Label = getCountryName(match.team1, locale);
 const team2Label = getCountryName(match.team2, locale);
 const groupUrl = match.group ? getGroupPath(match.group, locale) : null;
 const calendarUrl = getLocalizedRoutePath('routes.calendar', locale);
+const homeUrl = getLocalizedPath('/', locale);
 ---
 
 <article class="match-detail">
+  <Breadcrumbs
+    locale={locale}
+    items={[
+      { label: t('nav.home'), href: homeUrl },
+      { label: t('nav.calendar'), href: calendarUrl },
+      { label: `${team1Label} ${t('home.versus')} ${team2Label}` },
+    ]}
+  />
+
   <header class="match-hero">
     <p class="eyebrow">{match.group ?? match.round}</p>
     <h1>{team1Label} {t('home.versus')} {team2Label}</h1>
@@ -72,6 +86,16 @@ const calendarUrl = getLocalizedRoutePath('routes.calendar', locale);
       </div>
     </dl>
   </section>
+
+  <ContextualLinks
+    title={t('home.detailsTitle')}
+    links={[
+      { label: team1Label, href: getTeamPath(match.team1, locale), description: t('team.metaDescription') },
+      { label: team2Label, href: getTeamPath(match.team2, locale), description: t('team.metaDescription') },
+      ...(groupUrl ? [{ label: match.group ?? '', href: groupUrl, description: t('group.metaDescription') }] : []),
+      { label: match.ground, href: getVenuePath(match.ground, locale), description: t('venue.metaDescription') },
+    ]}
+  />
 </article>
 
 <LocalMatchTimeScript />

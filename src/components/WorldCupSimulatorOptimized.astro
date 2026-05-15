@@ -2,10 +2,9 @@
 import Breadcrumbs from './Breadcrumbs.astro';
 import ContextualLinks from './ContextualLinks.astro';
 import type { Locale } from '../config/site';
-import type { WorldCupMatch, WorldCupSummary } from '../data/worldcup2026';
-import { getCountryFlagUrl, getCountryName, isKnownCountry } from '../i18n/countries';
+import type { WorldCupSummary } from '../data/worldcup2026';
 import { getLocalizedPath, getLocalizedRoutePath, useTranslations } from '../i18n/ui';
-import type { SimulatorMatch } from '../scripts/simulator-model';
+import { getSimulatorMatches } from '../utils/simulator';
 
 interface Props {
   locale: Locale;
@@ -17,36 +16,7 @@ const t = useTranslations(locale);
 const homeUrl = getLocalizedPath('/', locale);
 const calendarUrl = getLocalizedRoutePath('routes.calendar', locale);
 const simulatorUrl = getLocalizedRoutePath('routes.simulator', locale);
-
-function getGroupCode(groupName?: string) {
-  return groupName?.match(/[A-Z]$/)?.[0] ?? '';
-}
-
-function getMatchId(match: WorldCupMatch, index: number) {
-  return match.num ? `m${match.num}` : `i${index}`;
-}
-
-function getTeamPayload(team: string) {
-  return {
-    raw: team,
-    label: getCountryName(team, locale),
-    flag: getCountryFlagUrl(team),
-    isCountry: isKnownCountry(team),
-  };
-}
-
-const simulatorMatches: SimulatorMatch[] = summary.matches.map((match, index) => ({
-  id: getMatchId(match, index),
-  index,
-  num: match.num ?? null,
-  round: match.round,
-  group: match.group ?? null,
-  groupCode: getGroupCode(match.group),
-  team1: getTeamPayload(match.team1),
-  team2: getTeamPayload(match.team2),
-  score1: match.score1 ?? null,
-  score2: match.score2 ?? null,
-}));
+const simulatorMatches = getSimulatorMatches(summary.matches, locale);
 
 const simulatorData = {
   labels: {

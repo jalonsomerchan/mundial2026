@@ -1,0 +1,88 @@
+---
+import BracketMatchCard from './BracketMatchCard.astro';
+import type { Locale } from '../config/site';
+import type { BracketRound } from '../utils/bracket';
+import { useTranslations } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+  round: BracketRound;
+}
+
+const { locale, round } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<section class="bracket-round" id={round.id} aria-labelledby={`${round.id}-title`}>
+  <header class="bracket-round__header">
+    <div>
+      <p class="eyebrow">{t('bracket.roundEyebrow')}</p>
+      <h2 id={`${round.id}-title`}>{round.name}</h2>
+    </div>
+    <span>{round.matches.length} {round.matches.length === 1 ? t('calendar.matchSingular') : t('calendar.matchPlural')}</span>
+  </header>
+
+  <div class="bracket-round__matches" role="list" aria-label={`${round.name}: ${t('bracket.matchesInRound')}`}>
+    {round.matches.map((item) => (
+      <div role="listitem">
+        <BracketMatchCard locale={locale} item={item} />
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .bracket-round {
+    background: color-mix(in srgb, var(--color-surface), transparent 10%);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-xs);
+    padding: var(--space-5);
+  }
+
+  .bracket-round__header {
+    align-items: start;
+    display: flex;
+    gap: var(--space-4);
+    justify-content: space-between;
+    margin-bottom: var(--space-5);
+  }
+
+  .eyebrow {
+    color: var(--color-primary);
+    font-size: 0.74rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    margin: 0 0 var(--space-2);
+    text-transform: uppercase;
+  }
+
+  h2 {
+    font-size: clamp(1.45rem, 6vw, 2.25rem);
+    font-weight: 950;
+    letter-spacing: -0.055em;
+    line-height: 1.05;
+    margin: 0;
+  }
+
+  .bracket-round__header > span {
+    background: var(--color-primary-soft);
+    border-radius: var(--radius-full);
+    color: var(--color-primary);
+    flex: 0 0 auto;
+    font-size: 0.78rem;
+    font-weight: 850;
+    padding: 0.35rem 0.7rem;
+  }
+
+  .bracket-round__matches {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  @media (min-width: 860px) {
+    .bracket-round__matches {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

@@ -1,0 +1,136 @@
+---
+import BracketTeam from './BracketTeam.astro';
+import VenueLink from './VenueLink.astro';
+import type { Locale } from '../config/site';
+import type { BracketMatch } from '../utils/bracket';
+import { useTranslations } from '../i18n/ui';
+import { getMatchPath, getMatchResult, getMatchUtcIso } from '../utils/matches';
+
+interface Props {
+  locale: Locale;
+  item: BracketMatch;
+}
+
+const { locale, item } = Astro.props;
+const t = useTranslations(locale);
+const { match, team1, team2 } = item;
+const matchUrl = getMatchPath(match, locale);
+const matchIso = getMatchUtcIso(match);
+const result = getMatchResult(match);
+const matchLabel = match.num ? `${t('bracket.matchNumber')} ${match.num}` : t('match.viewDetails');
+---
+
+<article class="bracket-match" aria-labelledby={`bracket-match-${item.simulatorMatch.id}`}>
+  <header class="bracket-match__header">
+    <p id={`bracket-match-${item.simulatorMatch.id}`}>{matchLabel}</p>
+    <a href={matchUrl}>{t('match.viewDetails')}</a>
+  </header>
+
+  <div class="bracket-match__teams" role="list" aria-label={t('bracket.matchTeams')}>
+    <div role="listitem">
+      <BracketTeam locale={locale} team={team1} fallback={match.team1} />
+    </div>
+    <div role="listitem">
+      <BracketTeam locale={locale} team={team2} fallback={match.team2} />
+    </div>
+  </div>
+
+  <dl class="bracket-match__meta">
+    <div>
+      <dt>{t('home.result')}</dt>
+      <dd>{result}</dd>
+    </div>
+    <div>
+      <dt>{t('home.localTime')}</dt>
+      <dd><time class="js-local-time" datetime={matchIso}>{match.time}</time></dd>
+    </div>
+    <div>
+      <dt>{t('home.venue')}</dt>
+      <dd><VenueLink locale={locale} venue={match.ground} /></dd>
+    </div>
+  </dl>
+</article>
+
+<style>
+  .bracket-match {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xs);
+    display: grid;
+    gap: var(--space-4);
+    min-width: 17rem;
+    padding: var(--space-4);
+  }
+
+  .bracket-match__header {
+    align-items: center;
+    display: flex;
+    gap: var(--space-3);
+    justify-content: space-between;
+  }
+
+  .bracket-match__header p {
+    color: var(--color-primary);
+    font-size: 0.76rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  .bracket-match__header a {
+    color: var(--color-text-soft);
+    font-size: 0.82rem;
+    font-weight: 850;
+    text-decoration: none;
+  }
+
+  .bracket-match__header a:hover {
+    color: var(--color-primary);
+  }
+
+  .bracket-match__teams {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .bracket-match__teams > div {
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    min-width: 0;
+    padding: var(--space-3);
+  }
+
+  .bracket-match__meta {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+  }
+
+  .bracket-match__meta div {
+    align-items: baseline;
+    display: flex;
+    gap: var(--space-2);
+    justify-content: space-between;
+    min-width: 0;
+  }
+
+  .bracket-match__meta dt {
+    color: var(--color-text-soft);
+    font-size: 0.72rem;
+    font-weight: 850;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .bracket-match__meta dd {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    font-weight: 750;
+    margin: 0;
+    min-width: 0;
+    text-align: right;
+  }
+</style>

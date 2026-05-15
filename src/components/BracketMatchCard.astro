@@ -9,9 +9,10 @@ import { getMatchPath, getMatchResult, getMatchUtcIso } from '../utils/matches';
 interface Props {
   locale: Locale;
   item: BracketMatch;
+  compact?: boolean;
 }
 
-const { locale, item } = Astro.props;
+const { locale, item, compact = false } = Astro.props;
 const t = useTranslations(locale);
 const { match, team1, team2 } = item;
 const matchUrl = getMatchPath(match, locale);
@@ -20,7 +21,7 @@ const result = getMatchResult(match);
 const matchLabel = match.num ? `${t('bracket.matchNumber')} ${match.num}` : t('match.viewDetails');
 ---
 
-<article class="bracket-match" aria-labelledby={`bracket-match-${item.simulatorMatch.id}`}>
+<article class:list={['bracket-match', compact && 'bracket-match--compact']} aria-labelledby={`bracket-match-${item.simulatorMatch.id}`}>
   <header class="bracket-match__header">
     <p id={`bracket-match-${item.simulatorMatch.id}`}>{matchLabel}</p>
     <a href={matchUrl}>{t('match.viewDetails')}</a>
@@ -63,6 +64,12 @@ const matchLabel = match.num ? `${t('bracket.matchNumber')} ${match.num}` : t('m
     padding: var(--space-4);
   }
 
+  .bracket-match--compact {
+    gap: var(--space-3);
+    min-width: 0;
+    padding: var(--space-3);
+  }
+
   .bracket-match__header {
     align-items: center;
     display: flex;
@@ -101,6 +108,10 @@ const matchLabel = match.num ? `${t('bracket.matchNumber')} ${match.num}` : t('m
     border-radius: var(--radius-lg);
     min-width: 0;
     padding: var(--space-3);
+  }
+
+  .bracket-match--compact .bracket-match__teams > div {
+    padding: 0.65rem 0.75rem;
   }
 
   .bracket-match__meta {

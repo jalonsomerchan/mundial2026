@@ -99,7 +99,7 @@ describe('project smoke checks', () => {
   });
 
   it('keeps basic template components available', () => {
-    ['Button', 'CalendarMatchRow', 'Container', 'Footer', 'GroupPage', 'GroupStandingsTable', 'Header', 'LocalMatchTimeScript', 'MatchCalendar', 'MatchCard', 'MatchDetailPage', 'MatchScoreboard', 'SimulatorKnockoutPatch', 'SimulatorRandomizer', 'TeamLink', 'TeamPage', 'VenueLink', 'VenuePage', 'WorldCupExplorer', 'WorldCupSimulator'].forEach((component) => {
+    ['Breadcrumbs', 'Button', 'CalendarMatchRow', 'Container', 'ContextualLinks', 'Footer', 'GroupPage', 'GroupStandingsTable', 'Header', 'LocalMatchTimeScript', 'MatchCalendar', 'MatchCard', 'MatchDetailPage', 'MatchScoreboard', 'SimulatorKnockoutPatch', 'SimulatorRandomizer', 'TeamLink', 'TeamPage', 'VenueLink', 'VenuePage', 'WorldCupExplorer', 'WorldCupSimulator'].forEach((component) => {
       assert.equal(
         existsSync(join(root, `src/components/${component}.astro`)),
         true,
@@ -209,6 +209,18 @@ describe('project smoke checks', () => {
     assert.match(explorer, /TeamLink/);
   });
 
+  it('keeps reusable breadcrumbs and contextual links accessible', () => {
+    const breadcrumbs = readText('src/components/Breadcrumbs.astro');
+    const contextualLinks = readText('src/components/ContextualLinks.astro');
+
+    assert.match(breadcrumbs, /<nav class="breadcrumbs"/);
+    assert.match(breadcrumbs, /aria-current="page"/);
+    assert.match(breadcrumbs, /:focus-visible/);
+    assert.match(contextualLinks, /aria-labelledby="contextual-links-title"/);
+    assert.match(contextualLinks, /ContextualLink/);
+    assert.match(contextualLinks, /:focus-visible/);
+  });
+
   it('keeps match cards readable with countdowns, local time, results and details links', () => {
     const dataHelper = readText('src/data/worldcup2026.ts');
     const matchCard = readText('src/components/MatchCard.astro');
@@ -241,6 +253,9 @@ describe('project smoke checks', () => {
     const englishPage = readText('src/pages/en/calendar/index.astro');
     const header = readText('src/components/Header.astro');
 
+    assert.match(calendar, /Breadcrumbs/);
+    assert.match(calendar, /ContextualLinks/);
+    assert.match(calendar, /getLocalizedRoutePath/);
     assert.match(calendar, /day-section/);
     assert.match(calendar, /CalendarMatchRow/);
     assert.match(calendarRow, /calendar-match-row/);
@@ -254,7 +269,7 @@ describe('project smoke checks', () => {
     assert.match(header, /nav\.calendar/);
   });
 
-  it('keeps group pages with standings and matches wired', () => {
+  it('keeps group pages with standings, breadcrumbs and matches wired', () => {
     const groupPage = readText('src/components/GroupPage.astro');
     const standingsTable = readText('src/components/GroupStandingsTable.astro');
     const groupsUtils = readText('src/utils/groups.ts');
@@ -262,6 +277,9 @@ describe('project smoke checks', () => {
     const englishPage = readText('src/pages/en/groups/[group].astro');
     const explorer = readText('src/components/WorldCupExplorer.astro');
 
+    assert.match(groupPage, /Breadcrumbs/);
+    assert.match(groupPage, /ContextualLinks/);
+    assert.match(groupPage, /getTeamPath/);
     assert.match(groupPage, /GroupStandingsTable/);
     assert.match(groupPage, /CalendarMatchRow/);
     assert.match(standingsTable, /standings-table/);
@@ -273,7 +291,7 @@ describe('project smoke checks', () => {
     assert.match(explorer, /getGroupPath/);
   });
 
-  it('keeps team pages and team links wired', () => {
+  it('keeps team pages, breadcrumbs and team links wired', () => {
     const teamPage = readText('src/components/TeamPage.astro');
     const teamLink = readText('src/components/TeamLink.astro');
     const teamsUtils = readText('src/utils/teams.ts');
@@ -281,7 +299,9 @@ describe('project smoke checks', () => {
     const englishPage = readText('src/pages/en/teams/[team].astro');
     const explorer = readText('src/components/WorldCupExplorer.astro');
 
-    assert.match(teamPage, /TeamSummary/);
+    assert.match(teamPage, /Breadcrumbs/);
+    assert.match(teamPage, /ContextualLinks/);
+    assert.match(teamPage, /getGroupPath/);
     assert.match(teamPage, /CalendarMatchRow/);
     assert.match(teamLink, /getTeamPath/);
     assert.match(teamsUtils, /getTeamsFromMatches/);
@@ -302,12 +322,18 @@ describe('project smoke checks', () => {
     const spanishVenuePage = readText('src/pages/sedes/[venue].astro');
     const englishVenuePage = readText('src/pages/en/venues/[venue].astro');
 
+    assert.match(matchPage, /Breadcrumbs/);
+    assert.match(matchPage, /ContextualLinks/);
+    assert.match(matchPage, /getTeamPath/);
+    assert.match(matchPage, /getVenuePath/);
     assert.match(matchPage, /MatchScoreboard/);
     assert.match(matchPage, /VenueLink/);
     assert.match(matchPage, /getGroupPath/);
     assert.match(matchPage, /getLocalizedRoutePath/);
     assert.match(scoreboard, /TeamLink/);
     assert.match(scoreboard, /getMatchResult/);
+    assert.match(venuePage, /Breadcrumbs/);
+    assert.match(venuePage, /ContextualLinks/);
     assert.match(venuePage, /CalendarMatchRow/);
     assert.match(venueLink, /getVenuePath/);
     assert.match(venuesUtils, /getVenuePath/);
@@ -320,6 +346,7 @@ describe('project smoke checks', () => {
 
   it('keeps the simulator page wired', () => {
     const simulator = readText('src/components/WorldCupSimulator.astro');
+    const optimizedSimulator = readText('src/components/WorldCupSimulatorOptimized.astro');
     const knockoutPatch = readText('src/components/SimulatorKnockoutPatch.astro');
     const randomizer = readText('src/components/SimulatorRandomizer.astro');
     const spanishPage = readText('src/pages/simulador/index.astro');
@@ -332,6 +359,9 @@ describe('project smoke checks', () => {
     assert.match(simulator, /getGroupStandings/);
     assert.match(simulator, /resolveToken/);
     assert.match(simulator, /data-pick/);
+    assert.match(optimizedSimulator, /Breadcrumbs/);
+    assert.match(optimizedSimulator, /ContextualLinks/);
+    assert.match(optimizedSimulator, /getLocalizedRoutePath/);
     assert.match(knockoutPatch, /MutationObserver/);
     assert.match(knockoutPatch, /resolveTeam/);
     assert.match(knockoutPatch, /getWinner/);

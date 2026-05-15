@@ -11,6 +11,7 @@ const { locale } = Astro.props;
 const t = useTranslations(locale);
 const homeUrl = getLocalizedPath('/', locale);
 const calendarUrl = getLocalizedRoutePath('routes.calendar', locale);
+const bracketUrl = getLocalizedRoutePath('routes.bracket', locale);
 const simulatorUrl = getLocalizedRoutePath('routes.simulator', locale);
 const alternateLocales = getAlternateLocales(locale);
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
@@ -27,6 +28,7 @@ function isCurrentPath(href: string) {
     <nav aria-label={t('a11y.primaryNavigation')} class="flex items-center gap-3 text-sm text-[var(--color-text-muted)]">
       <a class="font-semibold hover:text-[var(--color-text)]" href={homeUrl} aria-current={isCurrentPath(homeUrl) ? 'page' : undefined}>{t('nav.home')}</a>
       <a class="font-semibold hover:text-[var(--color-text)]" href={calendarUrl} aria-current={isCurrentPath(calendarUrl) ? 'page' : undefined}>{t('nav.calendar')}</a>
+      <a class="font-semibold hover:text-[var(--color-text)]" href={bracketUrl} aria-current={isCurrentPath(bracketUrl) ? 'page' : undefined}>{t('nav.bracket')}</a>
       <a class="font-semibold hover:text-[var(--color-text)]" href={simulatorUrl} aria-current={isCurrentPath(simulatorUrl) ? 'page' : undefined}>{t('nav.simulator')}</a>
       {alternateLocales.map((alternateLocale) => (
         <a

@@ -1,0 +1,83 @@
+---
+import type { Locale } from '../config/site';
+import { useTranslations } from '../i18n/ui';
+
+export interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+interface Props {
+  locale: Locale;
+  items: BreadcrumbItem[];
+}
+
+const { locale, items } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<nav class="breadcrumbs" aria-label={t('a11y.primaryNavigation')}>
+  <ol>
+    {items.map((item, index) => {
+      const isCurrent = index === items.length - 1 || !item.href;
+      return (
+        <li>
+          {isCurrent ? (
+            <span aria-current="page">{item.label}</span>
+          ) : (
+            <a href={item.href}>{item.label}</a>
+          )}
+        </li>
+      );
+    })}
+  </ol>
+</nav>
+
+<style>
+  .breadcrumbs {
+    color: var(--color-text-soft);
+    font-size: 0.86rem;
+    font-weight: 800;
+    margin-bottom: var(--space-6);
+  }
+
+  .breadcrumbs ol {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .breadcrumbs li {
+    align-items: center;
+    display: inline-flex;
+    gap: var(--space-2);
+  }
+
+  .breadcrumbs li:not(:last-child)::after {
+    color: var(--color-border-strong);
+    content: '/';
+  }
+
+  .breadcrumbs a {
+    border-radius: var(--radius-sm);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .breadcrumbs a:hover {
+    color: var(--color-primary);
+  }
+
+  .breadcrumbs a:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--color-primary), transparent 25%);
+    outline-offset: 3px;
+  }
+
+  .breadcrumbs [aria-current='page'] {
+    color: var(--color-text-muted);
+  }
+</style>

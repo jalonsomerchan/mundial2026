@@ -1,9 +1,11 @@
 ---
+import Breadcrumbs from './Breadcrumbs.astro';
 import CalendarMatchRow from './CalendarMatchRow.astro';
+import ContextualLinks from './ContextualLinks.astro';
 import LocalMatchTimeScript from './LocalMatchTimeScript.astro';
 import type { Locale } from '../config/site';
 import type { MatchDay } from '../utils/calendar';
-import { useTranslations } from '../i18n/ui';
+import { getLocalizedPath, getLocalizedRoutePath, useTranslations } from '../i18n/ui';
 
 interface Props {
   locale: Locale;
@@ -18,6 +20,9 @@ const dateFormatter = new Intl.DateTimeFormat(locale, {
   month: 'long',
   year: 'numeric',
 });
+const homeUrl = getLocalizedPath('/', locale);
+const simulatorUrl = getLocalizedRoutePath('routes.simulator', locale);
+const currentUrl = getLocalizedRoutePath('routes.calendar', locale);
 
 function formatDay(date: string) {
   return dateFormatter.format(new Date(`${date}T12:00:00Z`));
@@ -25,6 +30,14 @@ function formatDay(date: string) {
 ---
 
 <div class="calendar-page">
+  <Breadcrumbs
+    locale={locale}
+    items={[
+      { label: t('nav.home'), href: homeUrl },
+      { label: t('nav.calendar'), href: currentUrl },
+    ]}
+  />
+
   <header class="calendar-hero">
     <p class="eyebrow">{t('calendar.eyebrow')}</p>
     <h1>{t('calendar.title')}</h1>
@@ -53,6 +66,14 @@ function formatDay(date: string) {
       </section>
     ))}
   </div>
+
+  <ContextualLinks
+    title={t('home.detailsTitle')}
+    links={[
+      { label: t('nav.simulator'), href: simulatorUrl, description: t('simulator.metaDescription') },
+      { label: t('nav.home'), href: homeUrl, description: t('home.metaDescription') },
+    ]}
+  />
 </div>
 
 <LocalMatchTimeScript />

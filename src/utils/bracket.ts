@@ -27,7 +27,7 @@ export function getKnockoutMatches(matches: WorldCupMatch[]) {
 
 export function getRoundLabel(round: string, locale: Locale) {
   const labels: Record<string, Record<Locale, string>> = {
-    'Round of 32': { es: 'Dieciseisavos de final', en: 'Round of 32' },
+    'Round of 32': { es: 'Ronda de 32', en: 'Round of 32' },
     'Round of 16': { es: 'Octavos de final', en: 'Round of 16' },
     'Quarter-finals': { es: 'Cuartos de final', en: 'Quarter-finals' },
     'Semi-finals': { es: 'Semifinales', en: 'Semi-finals' },
@@ -48,7 +48,7 @@ export function getBracketRounds(
   const matchByIndex = new Map(simulatorMatches.map((match) => [match.index, match]));
   const rounds = new Map<string, BracketMatch[]>();
 
-  getKnockoutMatches(matches).forEach((match, index) => {
+  getKnockoutMatches(matches).forEach((match) => {
     const simulatorMatch = matchByIndex.get(matches.indexOf(match));
 
     if (!simulatorMatch) return;

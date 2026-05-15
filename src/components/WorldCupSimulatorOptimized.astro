@@ -1,8 +1,10 @@
 ---
+import Breadcrumbs from './Breadcrumbs.astro';
+import ContextualLinks from './ContextualLinks.astro';
 import type { Locale } from '../config/site';
 import type { WorldCupMatch, WorldCupSummary } from '../data/worldcup2026';
 import { getCountryFlagUrl, getCountryName, isKnownCountry } from '../i18n/countries';
-import { useTranslations } from '../i18n/ui';
+import { getLocalizedPath, getLocalizedRoutePath, useTranslations } from '../i18n/ui';
 import type { SimulatorMatch } from '../scripts/simulator-model';
 
 interface Props {
@@ -12,6 +14,9 @@ interface Props {
 
 const { locale, summary } = Astro.props;
 const t = useTranslations(locale);
+const homeUrl = getLocalizedPath('/', locale);
+const calendarUrl = getLocalizedRoutePath('routes.calendar', locale);
+const simulatorUrl = getLocalizedRoutePath('routes.simulator', locale);
 
 function getGroupCode(groupName?: string) {
   return groupName?.match(/[A-Z]$/)?.[0] ?? '';
@@ -60,6 +65,14 @@ const simulatorData = {
 ---
 
 <section class="simulator-shell" aria-labelledby="simulator-title">
+  <Breadcrumbs
+    locale={locale}
+    items={[
+      { label: t('nav.home'), href: homeUrl },
+      { label: t('nav.simulator'), href: simulatorUrl },
+    ]}
+  />
+
   <header class="simulator-hero">
     <div class="hero-content">
       <p class="eyebrow">{t('simulator.eyebrow')}</p>
@@ -77,6 +90,14 @@ const simulatorData = {
   </aside>
 
   <div class="simulator-board" data-simulator-board role="region" aria-label={t('a11y.simulatorBoard')}></div>
+
+  <ContextualLinks
+    title={t('home.detailsTitle')}
+    links={[
+      { label: t('nav.calendar'), href: calendarUrl, description: t('calendar.metaDescription') },
+      { label: t('nav.home'), href: homeUrl, description: t('home.metaDescription') },
+    ]}
+  />
 </section>
 
 <script type="application/json" id="worldcup-simulator-data" set:html={JSON.stringify(simulatorData)}></script>
@@ -178,29 +199,5 @@ const simulatorData = {
     display: inline-flex;
     gap: var(--space-2);
     font-size: clamp(1.25rem, 6vw, 2.1rem);
-    font-weight: 800;
-    letter-spacing: -0.045em;
-    line-height: 1;
-  }
-
-  .simulator-board {
-    contain: layout style;
-  }
-
-  .simulator-board :global(.sim-round) {
-    content-visibility: auto;
-    contain-intrinsic-size: 48rem;
-  }
-
-  .simulator-board :global(.sim-match),
-  .simulator-board :global(.sim-group-table) {
-    content-visibility: auto;
-    contain-intrinsic-size: 10rem;
-  }
-
-  @media (max-width: 560px) {
-    .simulator-board :global(.sim-round) {
-      contain-intrinsic-size: 64rem;
-    }
   }
 </style>

@@ -1,9 +1,11 @@
 ---
+import Breadcrumbs from './Breadcrumbs.astro';
 import CalendarMatchRow from './CalendarMatchRow.astro';
+import ContextualLinks from './ContextualLinks.astro';
 import LocalMatchTimeScript from './LocalMatchTimeScript.astro';
 import type { Locale } from '../config/site';
 import type { VenueSummary } from '../utils/venues';
-import { useTranslations } from '../i18n/ui';
+import { getLocalizedPath, getLocalizedRoutePath, useTranslations } from '../i18n/ui';
 
 interface Props {
   locale: Locale;
@@ -12,9 +14,20 @@ interface Props {
 
 const { locale, venue } = Astro.props;
 const t = useTranslations(locale);
+const homeUrl = getLocalizedPath('/', locale);
+const calendarUrl = getLocalizedRoutePath('routes.calendar', locale);
 ---
 
 <article class="venue-page">
+  <Breadcrumbs
+    locale={locale}
+    items={[
+      { label: t('nav.home'), href: homeUrl },
+      { label: t('home.venue'), href: homeUrl },
+      { label: venue.name },
+    ]}
+  />
+
   <header class="venue-hero">
     <p class="eyebrow">{t('venue.eyebrow')}</p>
     <h1>{venue.name}</h1>
@@ -30,6 +43,14 @@ const t = useTranslations(locale);
       {venue.matches.map((match) => <CalendarMatchRow locale={locale} match={match} />)}
     </div>
   </section>
+
+  <ContextualLinks
+    title={t('home.detailsTitle')}
+    links={[
+      { label: t('nav.calendar'), href: calendarUrl, description: t('calendar.metaDescription') },
+      { label: t('nav.home'), href: homeUrl, description: t('home.metaDescription') },
+    ]}
+  />
 </article>
 
 <LocalMatchTimeScript />

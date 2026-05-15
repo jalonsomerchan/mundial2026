@@ -1,0 +1,90 @@
+---
+export interface ContextualLink {
+  label: string;
+  href: string;
+  description?: string;
+}
+
+interface Props {
+  title: string;
+  links: ContextualLink[];
+}
+
+const { title, links } = Astro.props;
+---
+
+{links.length > 0 && (
+  <nav class="contextual-links" aria-labelledby="contextual-links-title">
+    <h2 id="contextual-links-title">{title}</h2>
+    <ul>
+      {links.map((link) => (
+        <li>
+          <a href={link.href}>{link.label}</a>
+          {link.description && <p>{link.description}</p>}
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}
+
+<style>
+  .contextual-links {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-xs);
+    margin-top: var(--space-6);
+    padding: var(--space-5);
+  }
+
+  .contextual-links h2 {
+    font-size: clamp(1.35rem, 5vw, 2rem);
+    font-weight: 900;
+    letter-spacing: -0.045em;
+    line-height: 1.1;
+    margin: 0 0 var(--space-4);
+  }
+
+  .contextual-links ul {
+    display: grid;
+    gap: var(--space-3);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .contextual-links li {
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+  }
+
+  .contextual-links a {
+    color: var(--color-text);
+    font-weight: 900;
+    text-decoration: none;
+  }
+
+  .contextual-links a:hover {
+    color: var(--color-primary);
+  }
+
+  .contextual-links a:focus-visible {
+    border-radius: var(--radius-sm);
+    outline: 3px solid color-mix(in srgb, var(--color-primary), transparent 25%);
+    outline-offset: 3px;
+  }
+
+  .contextual-links p {
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin: var(--space-2) 0 0;
+  }
+
+  @media (min-width: 720px) {
+    .contextual-links ul {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

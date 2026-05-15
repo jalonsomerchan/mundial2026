@@ -1,0 +1,43 @@
+---
+import TeamLink from './TeamLink.astro';
+import type { Locale } from '../config/site';
+import type { SimulatorTeam } from '../scripts/simulator-model';
+
+interface Props {
+  locale: Locale;
+  team: SimulatorTeam | null;
+  fallback: string;
+}
+
+const { locale, team, fallback } = Astro.props;
+---
+
+{team?.isCountry ? (
+  <TeamLink locale={locale} team={team.raw} flagSize={22} class="bracket-team" />
+) : (
+  <span class="bracket-team bracket-team--placeholder">
+    <span>{team?.label ?? fallback}</span>
+  </span>
+)}
+
+<style>
+  .bracket-team {
+    align-items: center;
+    display: inline-flex;
+    font-weight: 850;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+
+  .bracket-team--placeholder {
+    color: var(--color-text-soft);
+  }
+
+  .bracket-team :global(span),
+  .bracket-team--placeholder span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+</style>

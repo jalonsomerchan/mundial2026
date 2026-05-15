@@ -22,13 +22,27 @@ Si un equipo real está disponible, se enlaza a su página de selección. Si el 
 
 La interfaz se divide en componentes pequeños:
 
-- `WorldCupBracket.astro`: estructura de página, breadcrumbs, navegación por rondas y enlaces relacionados.
-- `BracketRoundSection.astro`: sección de cada ronda.
-- `BracketMatchCard.astro`: ficha accesible de partido.
+- `WorldCupBracket.astro`: estructura de página, breadcrumbs, navegación por rondas, tablero gráfico, lista accesible y enlaces relacionados.
+- `BracketBoard.astro`: tablero gráfico desplazable con zoom, arrastre táctil/ratón y navegación por teclado.
+- `BracketRoundSection.astro`: sección de cada ronda para la lista accesible y SEO.
+- `BracketMatchCard.astro`: ficha accesible de partido, con variante compacta para el tablero.
 - `BracketTeam.astro`: equipo real enlazado o placeholder de cruce pendiente.
+
+La primera ronda debe mostrarse como `Ronda de 32` en español. Aunque equivale a dieciseisavos por número de partidos, este texto evita confusión cuando todavía no hay equipos clasificados ni partidos jugados.
 
 Mantener los textos en `src/i18n/translations/*.json` y las rutas localizadas mediante `routes.bracket`.
 
+## Interacción del tablero
+
+El tablero gráfico debe poder usarse con:
+
+- Arrastre con ratón o dedo para moverse.
+- Botones de zoom para ampliar, reducir y restablecer.
+- Rueda del ratón con `Ctrl` o `Cmd` para zoom.
+- Teclado: flechas para desplazarse, `+` y `-` para zoom y `0` para restablecer.
+
+Debe mantenerse una lista HTML por rondas debajo del tablero para accesibilidad, SEO y usuarios que prefieran una lectura lineal.
+
 ## Tests
 
-`tests/bracket.test.mjs` comprueba rutas, componentes, helpers compartidos, accesibilidad básica, traducciones y navegación desde el header.
+`tests/bracket.test.mjs` comprueba rutas, componentes, helpers compartidos, accesibilidad básica, traducciones, navegación desde el header, etiqueta `Ronda de 32` y controles de tablero gráfico.

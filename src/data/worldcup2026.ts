@@ -1,3 +1,8 @@
+export interface WorldCupScore {
+  ft?: [number, number] | number[];
+  ht?: [number, number] | number[];
+}
+
 export interface WorldCupMatch {
   round: string;
   num?: number;
@@ -5,6 +10,7 @@ export interface WorldCupMatch {
   time: string;
   team1: string;
   team2: string;
+  score?: WorldCupScore;
   score1?: number;
   score2?: number;
   group?: string;
@@ -111,6 +117,30 @@ function isWorldCupData(data: unknown): data is WorldCupApiResponse {
   );
 }
 
+function normalizeMatchScore(match: WorldCupMatch): WorldCupMatch {
+  if (match.score1 !== undefined && match.score2 !== undefined) {
+    return match;
+  }
+
+  const fullTimeScore = match.score?.ft;
+
+  if (!Array.isArray(fullTimeScore) || fullTimeScore.length < 2) {
+    return match;
+  }
+
+  const [score1, score2] = fullTimeScore;
+
+  if (typeof score1 !== 'number' || typeof score2 !== 'number') {
+    return match;
+  }
+
+  return {
+    ...match,
+    score1,
+    score2,
+  };
+}
+
 function sortMatches(matches: WorldCupMatch[]) {
   return [...matches].sort((a, b) => {
     const byDate = a.date.localeCompare(b.date);
@@ -165,7 +195,7 @@ export async function getWorldCupSummary(): Promise<WorldCupSummary> {
     data = fallbackData;
   }
 
-  const matches = sortMatches(data.matches);
+  const matches = sortMatches(data.matches.map(normalizeMatchScore));
   const venues = [...new Set(matches.map((match) => match.ground))].sort((a, b) => a.localeCompare(b));
 
   return {
